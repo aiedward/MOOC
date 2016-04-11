@@ -1,0 +1,51 @@
+import java.util.ArrayList;
+import java.util.Date;
+
+
+public class Data {
+	/**
+	 * 제목
+	 */
+	public String title;
+	
+	/**
+	 * 
+	 * index
+	 */
+	public String index;
+	
+	/**
+	 * 셰어링 카운트
+	 * 
+	 */
+	public String SharingCount;
+	/**
+	 * 강연자
+	 */
+	public String author;
+	/**
+	 * 강의 설명
+	 */
+	public String description;
+	/**
+	 * 주소
+	 */
+	public String url;
+	
+	/**
+	 * 키워드
+	 */
+	public ArrayList<String> tag;
+	
+	public ArrayList<String> keyword;
+	
+	/**
+	 * 비디오 길이
+	 */
+	public String duration;
+	
+	public Date ReleaseDate;
+	
+	public String imgurl;
+	
+}

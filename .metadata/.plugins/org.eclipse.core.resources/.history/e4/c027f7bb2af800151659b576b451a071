@@ -1,0 +1,313 @@
+import java.awt.List;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+
+public class Tool {
+	/**
+	 * �޾ƿ����� ����Ʈ�� ���� ��Ÿ���� flag
+	 */
+	boolean endData=false;
+	int page = 1;
+	int index = 0;
+	ArrayList<Integer> pagelist = new ArrayList<Integer>(); 
+	/**
+	 * 
+	 * 
+	 * TEDSITE : TED�� ���� Ȩ������ �ּ�
+	 * 
+	 * @return �׵� ����Ʈ�� ���� ������ �ִ� �ּҵ��� ��ȯ
+	 */
+	public ArrayList<String> getAllVideoURL(final String TEDSITE)
+	{
+		
+		final ArrayList<String> data=new ArrayList<String>();
+		while (true) {
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					
+					Integer mpage=new Integer(page);
+					++page;
+					
+					/*String urlString = TEDSITE.concat("/talks/browse?page=").concat(
+							String.valueOf(mpage));*/
+					
+					String urlString = TEDSITE.concat("/talks?page=").concat(
+							String.valueOf(mpage));
+					pagelist.add(mpage);
+					Connection mainConn;
+					Document mainDom = null;
+					mainConn = Jsoup.connect(urlString).timeout(0);
+
+					try {
+						mainDom = mainConn.get();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					Element hrefs = mainDom.getElementById("browse-results");
+					if (hrefs.getElementsByClass("h3").isEmpty()) {
+
+						Elements rows = hrefs.getElementsByClass("row");
+						Elements a = rows.select("a");
+						int i = 0;
+						for (Element element : a) {
+
+							++i;
+							if (i % 2 == 0)
+								continue;
+							data.add(element.attr("href"));
+							System.out.print(element.attr("href")+"\n");
+						}
+
+					} else {
+						endData=true;
+					}
+				}
+			}).start();
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+
+			if(endData)
+			{
+				//threadLock
+				while(Thread.activeCount()!=1)
+				{
+				}
+				for (String string : data) {
+					System.out.print(string+"\n");
+				}
+
+				System.out.print("-----size------\n");
+				System.out.print(data.size()+"\n");
+				return data;
+				
+			}
+			
+			//page++;
+			
+		}
+	}
+	
+	
+	
+
+	org.w3c.dom.Document newCreatedDocument = null;
+	
+	synchronized public org.w3c.dom.Document createDomRoot(){
+		System.out.println("----------------Root create-----------------");
+
+		try {
+			newCreatedDocument = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().newDocument();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		org.w3c.dom.Node root = newCreatedDocument.createElement("ROOT");
+		newCreatedDocument.appendChild(root);
+		return newCreatedDocument;
+		
+	}
+	
+	
+	
+	
+	
+	public void crawlData(final String url, final Integer index){
+		
+
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+
+				// TODO Auto-generated method stub
+
+				Connection connection;
+				connection = Jsoup.connect(url).timeout(0);
+				
+				NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
+				Node root=nodelist.item(0);
+				
+				Document document = null;
+				
+				Data data = new Data();
+				data.keyword = new ArrayList<String>();
+				data.tag = new ArrayList<String>();
+
+
+				try {
+					document = connection.get();
+				} catch (Exception e) {
+				}
+				
+
+				data.url = url;
+				Element head = document.head();
+
+				Elements metadata = head.getElementsByTag("meta");
+
+				for (Element element : metadata) {
+
+					if (element.attr("name").equals("keywords")||element.attr("name").equals("keyword")) {
+						String content;
+						content = element.attr("content");
+						String[] parsedData = content.split(", ");
+						for (int i = 0; i < parsedData.length; i++) {
+							data.keyword.add(parsedData[i]);
+						}
+					} else if (element.attr("name").equals("author")) {
+						data.author = element.attr("content");
+					} else if (element.attr("property").equals("og:title")) {
+						data.title = element.attr("content");
+					} else if (element.attr("property").equals("og:image")) {
+						data.imgurl = element.attr("content");
+
+					} else if (element.attr("property").equals("video:tag")) {
+						data.tag.add(element.attr("content"));
+
+					} else if (element.attr("name").equals("description")) {
+						data.description = element.attr("content");
+					} else if (element.attr("property").equals("video:duration")) {
+						data.duration = element.attr("content");
+
+					} else if (element.attr("property").equals("video:release_date")){
+						//java.util.Date date = element.attr("content");
+						String tempDate = element.attr("content");
+						
+						data.ReleaseDate = new Date(Long.parseLong(tempDate)*1000);
+						
+					} else {
+						data.index = index.toString();
+					}
+				}
+
+				try {
+
+					data.SharingCount = document.getElementById("sharing-count")
+							.getElementsByClass("talk-sharing__value").get(0).html();
+					
+				} catch (Exception e) {
+					// TODO: handle exception
+					data.SharingCount="201021181";
+				}
+
+				org.w3c.dom.Element ted = newCreatedDocument.createElement("Ted");
+				
+				
+				root.appendChild(ted);
+				{
+					
+					// index
+					org.w3c.dom.Element node_id = newCreatedDocument
+							.createElement("id");
+					node_id.appendChild(newCreatedDocument.createTextNode(data.index));
+					ted.appendChild(node_id);
+					
+					
+					// author
+					org.w3c.dom.Element author = newCreatedDocument
+							.createElement("author");
+					author.appendChild(newCreatedDocument.createTextNode(data.author));
+					ted.appendChild(author);
+
+					// duration
+					org.w3c.dom.Element duration = newCreatedDocument
+							.createElement("duration");
+					duration.appendChild(newCreatedDocument
+							.createTextNode(data.duration));
+					ted.appendChild(duration);
+					// imageurl
+					org.w3c.dom.Element imageurl = newCreatedDocument
+							.createElement("imageurl");
+					imageurl.appendChild(newCreatedDocument
+							.createTextNode(data.imgurl));
+					ted.appendChild(imageurl);
+					// url
+					org.w3c.dom.Element urlDom = newCreatedDocument
+							.createElement("url");
+					urlDom.appendChild(newCreatedDocument
+							.createTextNode(data.url));
+					ted.appendChild(urlDom);
+					
+					// description
+					org.w3c.dom.Element description = newCreatedDocument
+							.createElement("description");
+					description.appendChild(newCreatedDocument
+							.createTextNode(data.description));
+					ted.appendChild(description);
+					
+					// release_date
+					org.w3c.dom.Element releaseDate = newCreatedDocument
+							.createElement("release_date");
+					
+					releaseDate.appendChild(newCreatedDocument
+							.createTextNode(data.ReleaseDate.toString()));
+					ted.appendChild(releaseDate);
+
+					org.w3c.dom.Element title = newCreatedDocument
+							.createElement("title");
+					title.appendChild(newCreatedDocument.createTextNode(data.title));
+					ted.appendChild(title);
+
+					org.w3c.dom.Element sharingcount = newCreatedDocument
+							.createElement("sharingcount");
+					sharingcount.appendChild(newCreatedDocument
+							.createTextNode(data.SharingCount));
+					ted.appendChild(sharingcount);
+
+					
+					org.w3c.dom.Element topics = newCreatedDocument.createElement("TOPICS");
+					
+					for (int i = 0; i < data.tag.size(); i++) {
+						org.w3c.dom.Element tag = newCreatedDocument
+								.createElement("topic");
+									
+						tag.appendChild(newCreatedDocument.createTextNode(data.tag.get(i)));
+						Integer temp_id = new Integer(i);
+						tag.setAttribute("id", temp_id.toString());
+						
+						
+						topics.appendChild(tag);
+					}
+					ted.appendChild(topics);
+					
+					/*
+					for (int i = 0; i < data.keyword.size(); i++) {
+						org.w3c.dom.Element keyword = newCreatedDocument
+								.createElement("keyword");
+						keyword.appendChild(newCreatedDocument
+								.createTextNode(data.keyword.get(i)));
+						ted.appendChild(keyword);
+					}
+					*/
+					
+				}
+			}
+		}).start();
+	}
+
+	
+}
