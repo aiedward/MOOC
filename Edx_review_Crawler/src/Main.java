@@ -38,7 +38,7 @@ public class Main {
 		
 		for (int url_id = 0; url_id <URLLIST.size(); url_id++) {
 			String urlString = targetSITE.concat(URLLIST.get(url_id));
-			while(Thread.activeCount() > 40)
+			while(Thread.activeCount() > 10)
 			{
 				try {
 					Thread.sleep(100);
@@ -51,13 +51,7 @@ public class Main {
 			System.out.print("activeThread : "+ Thread.activeCount()+"\n");
 			
 			tool.crawlData(urlString, url_id);
-			try {
-				Thread.sleep(1000);
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
 		
 		
