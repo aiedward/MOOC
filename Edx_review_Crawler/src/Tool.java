@@ -168,8 +168,7 @@ public class Tool {
 		
 		Integer mpage=new Integer(1);
 		
-		String urlString = url.concat("?page=").concat(
-				String.valueOf(mpage).concat("#reviews"));
+		String urlString = url.concat("?page=").concat(String.valueOf(mpage).concat("#reviews"));
 						
 		connection = Jsoup.connect(urlString).timeout(10*1000);
 		Document document = null;
@@ -201,111 +200,124 @@ public class Tool {
 		// TODO Auto-generated method stub
 		
 		Connection connection;
-		review_page = 1;
-		Integer reviewPage=new Integer(review_page);
-								
-								
-		String urlString = url.concat("?page=").
-				concat(String.valueOf(reviewPage).concat("#reviews"));
+		Integer reviewPage=new Integer(1);
+		String urlString;
 										
-		connection = Jsoup.connect(urlString).timeout(10*1000);
-			
 		// newCreatedDocument is destination of XML.
 		NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
 		Node root=nodelist.item(0);
 			
-		Document document = null;
+		Document document;
 			
 		Data data = new Data();
-							
-		try {
-			document = connection.get();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-				
-		Element body = document.body();
-		Element basic_info = body.getElementById("outbound");
 		
-		// course title
-		data.title = basic_info.attr("data-analytics-course");
-		// course-id
-		data.id = basic_info.attr("data-course-id");
-		// course rating
-		data.ratingValue = basic_info.attr("data-analytics-rating").toString();
-		// course provider
-		data.provider = basic_info.attr("data-analytics-provider");
-
-		Elements metadata = body.select("div.course-info__academic").first().children();
-		// providing school				
-		data.school = metadata.get(1).text();
-					
+		for( ;reviewPage <= page_size; reviewPage++){
 			
-		Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
-		System.out.println("size of reviews - " + reviews.size());
-		
-		if( reviewPage <= page_size){
-						
-			System.out.println("current url- " + urlString);
-			// making dom elements
-			org.w3c.dom.Element review_info = newCreatedDocument.createElement("Course-Reivew");
-			root.appendChild(review_info);
-			{
+			urlString = url.concat("?page=").concat(String.valueOf(reviewPage).concat("#reviews"));
+			
+			//System.out.println("current url- " + urlString);
+			connection = Jsoup.connect(urlString).timeout(10*1000);
 				
-				// course_id
-				org.w3c.dom.Element course_id = newCreatedDocument
-						.createElement("course_id");
-				course_id.appendChild(newCreatedDocument.createTextNode(data.id));
-				
-				// course_title
-				org.w3c.dom.Element course_title = newCreatedDocument.createElement("course_title");
-				course_title.appendChild(newCreatedDocument.createTextNode(data.title));
-				
-				
-				/*
-				 *  review data is always starting second index of reviews Elements
-				 *  Therefore, if the target course dosen't have any review, the for-loop below of this comment will be not operate 
-				 */
-				for(int i=2; i<reviews.size(); i++){
+			// newCreatedDocument is destination of XML.
+							
+			document = null;
+													
+			try {
+				document = connection.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 					
-					data.reviewer_id = reviews.get(i).getElementsByAttribute("data-review-id").attr("data-review-id");
+			Element body = document.body();
+			Element basic_info = body.getElementById("outbound");
+			
+			// course title
+			data.title = basic_info.attr("data-analytics-course");
+			// course-id
+			data.id = basic_info.attr("data-course-id");
+			// course rating
+			data.ratingValue = basic_info.attr("data-analytics-rating").toString();
+			// course provider
+			data.provider = basic_info.attr("data-analytics-provider");
+
+			Elements metadata = body.select("div.course-info__academic").first().children();
+			// providing school				
+			data.school = metadata.get(1).text();
+				
+			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
+			System.out.println("size of reviews at url - " + url + " = " + reviews.size());
+			
+					
+			/*
+			 *  review data is always starting second index of reviews Elements
+			 *  Therefore, if the target course dosen't have any review, the for-loop below of this comment will be not operate 
+			 */
+			for(int i=2; i<reviews.size(); i++){
+				
+				// making dom elements
+				org.w3c.dom.Element review_info = newCreatedDocument.createElement("Course-Reivew");
+				root.appendChild(review_info);
+				{
+					
+					data.review_data_id = reviews.get(i).getElementsByAttribute("data-review-id").attr("data-review-id");
 					data.review_date = reviews.get(i).select("div.review-body-info").select("time.review-body-info__pubdate").get(0).attr("datetime");
 					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();
 					data.review = reviews.get(i).select("div.review-body__content").get(0).text();
 					
-					
+					// course_id
+					org.w3c.dom.Element course_id = newCreatedDocument
+							.createElement("course_id");
+					course_id.appendChild(newCreatedDocument.createTextNode(data.id));
 					review_info.appendChild(course_id);
+					
+					// course_title
+					org.w3c.dom.Element course_title = newCreatedDocument.createElement("course_title");
+					course_title.appendChild(newCreatedDocument.createTextNode(data.title));
 					review_info.appendChild(course_title);
 					
-					org.w3c.dom.Element reviewer_id = newCreatedDocument.createElement("reviewer_id");
-					reviewer_id.appendChild(newCreatedDocument.createTextNode(data.reviewer_id));
-					review_info.appendChild(reviewer_id);
+					// course_school
+					org.w3c.dom.Element course_school = newCreatedDocument.createElement("school");
+					course_school.appendChild(newCreatedDocument.createTextNode(data.school));
+					review_info.appendChild(course_school);
 					
+					// review_id
+					// This web-site are not providing users' identification 
+					org.w3c.dom.Element review_id = newCreatedDocument.createElement("review_data_id");
+					review_id.appendChild(newCreatedDocument.createTextNode(data.review_data_id));
+					review_info.appendChild(review_id);
+					
+					// review_date
 					org.w3c.dom.Element review_date = newCreatedDocument.createElement("review_date");
 					review_date.appendChild(newCreatedDocument.createTextNode(data.review_date));
 					review_info.appendChild(review_date);
 					
+					// review_value
+					// This review_value means the value of courses' content
 					org.w3c.dom.Element review_value = newCreatedDocument.createElement("review_value");
 					review_value.appendChild(newCreatedDocument.createTextNode(data.review_value));
 					review_info.appendChild(review_value);
 					
+					// review contents
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
-					review.appendChild(newCreatedDocument.createTextNode(data.review));
+					if(data.review.isEmpty()){
+						review.appendChild(newCreatedDocument.createTextNode("blank"));
+					}else{
+						review.appendChild(newCreatedDocument.createTextNode(data.review));
+					}					
 					review_info.appendChild(review);
-					
 				}
-
 			}
-
 			
-			}else{
-				
-				System.out.println("last page of the course - " + reviewPage);
-				System.out.println("finish crawling in - " + url);
-				return;
-			}
 
+		}
+			
+		System.out.println("last page of the course - " + reviewPage);
+		System.out.println("finish crawling in - " + url);
+		return;
+		
 	}
+			
+		
+		
 
-	
 }
