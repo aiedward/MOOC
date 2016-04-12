@@ -42,7 +42,7 @@ public class Tool {
 		// jSoup Connection instance 
 		Connection mainConn;
 		Document mainDom = null;
-		mainConn = Jsoup.connect(urlString).timeout(1000*10);
+		mainConn = Jsoup.connect(urlString).timeout(1000*5);
 
 		try {
 			mainDom = mainConn.get();
@@ -76,7 +76,7 @@ public class Tool {
 					// jSoup Connection instance 
 					Connection mainConn;
 					Document mainDom = null;
-					mainConn = Jsoup.connect(urlString).timeout(1000*10);
+					mainConn = Jsoup.connect(urlString).timeout(1000*5);
 
 					try {
 						mainDom = mainConn.get();
@@ -245,7 +245,7 @@ public class Tool {
 			data.school = metadata.get(1).text();
 				
 			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
-			System.out.println("size of reviews at url - " + urlString + " = " + reviews.size());
+			System.out.println("size of reviews at url - " + url + " = " + reviews.size());
 			
 					
 			/*

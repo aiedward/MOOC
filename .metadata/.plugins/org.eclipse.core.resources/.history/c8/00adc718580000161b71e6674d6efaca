@@ -211,7 +211,7 @@ public class Tool {
 			
 		Data data = new Data();
 		
-		for( ;reviewPage <= page_size; reviewPage++){
+		for( ;reviewPage < page_size; reviewPage++){
 			
 			urlString = url.concat("?page=").concat(String.valueOf(reviewPage).concat("#reviews"));
 			
@@ -245,7 +245,7 @@ public class Tool {
 			data.school = metadata.get(1).text();
 				
 			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
-			System.out.println("size of reviews at url - " + urlString + " = " + reviews.size());
+			System.out.println("size of reviews at url - " + url + " = " + reviews.size());
 			
 					
 			/*

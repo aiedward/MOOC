@@ -211,7 +211,7 @@ public class Tool {
 			
 		Data data = new Data();
 		
-		for( ;reviewPage < page_size; reviewPage++){
+		for( ;reviewPage <= page_size; reviewPage++){
 			
 			urlString = url.concat("?page=").concat(String.valueOf(reviewPage).concat("#reviews"));
 			
@@ -299,7 +299,11 @@ public class Tool {
 					
 					// review contents
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
-					review.appendChild(newCreatedDocument.createTextNode(data.review));
+					if(data.review.isEmpty()){
+						review.appendChild(newCreatedDocument.createTextNode("blank"));
+					}else{
+						review.appendChild(newCreatedDocument.createTextNode(data.review));
+					}					
 					review_info.appendChild(review);
 				}
 			}
