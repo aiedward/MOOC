@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete 3 elements from project &apos;EdxCrawler&apos;&#x0D;&#x0A;- Original project: &apos;EdxCrawler&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     CousesTalkData_coursera20160407.xml&#x0D;&#x0A;     CousesTalkData_edx20160407.xml&#x0D;&#x0A;     CousesTalkData20160407_edX.xml" description="Delete elements" element1="CousesTalkData_edx20160407.xml" element2="CousesTalkData_coursera20160407.xml" element3="CousesTalkData20160407_edX.xml" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="3" stamp="1460564796127" subPackages="false" version="1.0"/>
+</session>
