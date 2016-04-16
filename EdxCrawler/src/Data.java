@@ -4,25 +4,15 @@ import java.util.Date;
 
 public class Data {
 	/**
-	 * Title of TED talk
+	 * Title of edX course
 	 */
 	public String title;
-	
-	/**
-	 * 
-	 * index
-	 */
-	public String index;
-	
-	/**
-	 * ViewCount
-	 * 
-	 */
-	public String SharingCount;
 	/**
 	 * author
 	 */
 	public String author;
+	
+	public String intro;
 	/**
 	 * talk description
 	 */
@@ -30,7 +20,14 @@ public class Data {
 	/**
 	 * url of the talk
 	 */
+	
+	public String course_index;
+	
 	public String url;
+	
+	public String date;
+	
+	public String subject;
 	
 	public ArrayList<String> tag;
 	
@@ -55,5 +52,7 @@ public class Data {
 	public String reviewValue;
 
 	public String reviewCount;
+
+	public String level;
 	
 }
