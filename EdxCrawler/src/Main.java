@@ -16,7 +16,7 @@ public class Main {
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		Tool tool=new Tool();
 

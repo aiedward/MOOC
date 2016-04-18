@@ -29,15 +29,7 @@ public class Data {
 	
 	public String subject;
 	
-	public ArrayList<String> tag;
-	
-	public ArrayList<String> keyword;
-	
-	public String duration;
-	
-	public Date ReleaseDate;
-	
-	public String imgurl;
+	public String learnAbout;
 
 	public String provider;
 
@@ -48,10 +40,6 @@ public class Data {
 	public String school;
 	
 	public String ratingValue;
-
-	public String reviewValue;
-
-	public String reviewCount;
 
 	public String level;
 	

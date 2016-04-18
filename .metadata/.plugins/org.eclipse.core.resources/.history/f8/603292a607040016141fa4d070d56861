@@ -1,0 +1,226 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+
+public class Tool {
+	
+	boolean endData=false;
+	int page = 1;
+	int index = 0;
+	ArrayList<Integer> pagelist = new ArrayList<Integer>(); 
+	Data courseData = new Data();
+	
+	public ArrayList<String> getVideoURL() throws IOException{
+		
+		FileInputStream inputFile = new FileInputStream("./courses_url_edX.txt");
+		
+		// Construct BufferReader from inputStreamReader
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
+		
+		final ArrayList<String> urlList = new ArrayList<String>();
+		
+		String line = null;
+		
+		// read url line by line 
+		while ( (line = fileReader.readLine()) != null){
+			urlList.add(line);
+		}
+		
+		fileReader.close();
+		
+		return urlList; 
+		
+	}
+		
+	/*
+	 * End of get All url function
+	 */
+	
+	/*
+	 * creatDomRoot
+	 * 
+	 */
+	
+	
+	org.w3c.dom.Document newCreatedDocument = null;
+	
+	synchronized public org.w3c.dom.Document createDomRoot(){
+		System.out.println("----------------Root create-----------------");
+
+		try {
+			newCreatedDocument = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().newDocument();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		org.w3c.dom.Node root = newCreatedDocument.createElement("ROOT");
+		newCreatedDocument.appendChild(root);
+		return newCreatedDocument;
+		
+	}
+	
+	/*
+	 * Crawl data.
+	 * 
+	 */
+	
+	public void crawlData(final String url, final Integer index) throws IOException{
+		
+		final WebDriver driver = new FirefoxDriver();
+		
+		// open website
+		driver.navigate().to(url);
+		
+		// newCreatedDocument is destination of XML.
+		NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
+		Node root=nodelist.item(0);
+				
+		
+		Data data = new Data();
+					
+		data.url = url;
+		
+		data.id = driver.findElement(By.id("course-info-page")).getAttribute("data-course-id");
+		System.out.println(data.id);
+
+	
+		ArrayList <WebElement> metadata = new ArrayList <WebElement> (driver.findElements(By.tagName("meta")));
+		
+		System.out.println("meta data size - " + metadata.size());
+		
+		for(int i=0; i<metadata.size(); i++){
+//			WebElement element = metadata.get(i);
+			if(metadata.get(i).getAttribute("property").equals("og:title")){
+				//course title
+				data.title = metadata.get(i).getAttribute("content");
+				System.out.println("title - " +data.title);
+				
+			}else if(metadata.get(i).getAttribute("property").equals("og:description")){
+				//course intro
+				data.intro = metadata.get(i).getAttribute("content");
+				System.out.println("intro - " +data.intro);
+				
+			}else if(metadata.get(i).getAttribute("property").equals("article:published_time")){
+				// course published time
+				data.date = metadata.get(i).getAttribute("content");
+				System.out.println("date - " +data.date);
+				
+				// break loop when assign three values
+				break;
+			}
+			
+		}
+
+		// Parsing course-Summary
+		//System.out.println(driver.findElement(By.id("course-summary-area")).findElements(By.cssSelector("li")).get(1).getText());
+		
+		ArrayList <WebElement> Summary = new ArrayList <WebElement> (driver.findElement(By.id("course-summary-area"))
+				.findElements(By.cssSelector("li")) );
+		
+		for(int i=0; i<Summary.size(); i++){
+			
+			if(Summary.get(i).getAttribute("data-field").equals("school")){
+				data.school = Summary.get(i).getText();
+				System.out.println("school - " + data.school);
+			}else if(Summary.get(i).getAttribute("data-field").equals("subject")){
+				data.subject = Summary.get(i).getText();
+				System.out.println("subject - " + data.subject);
+			}else if(Summary.get(i).getAttribute("data-field").equals("level")){
+				data.level = Summary.get(i).getText();
+				System.out.println("level - " + data.level);
+				
+				// break loop when assign three values
+				break;
+			}
+			
+		}
+		
+		// Parsing course-about
+		
+		ArrayList <WebElement> Detail = new ArrayList <WebElement> (driver.findElement(By.id("course-about-area"))
+				.findElements(By.cssSelector("div.content-grouping")) );
+		
+		data.description = Detail.get(0).findElement(By.cssSelector("div.see-more-content")).getText();
+		System.out.println("description - " + data.description);
+		
+		data.learnAbout = Detail.get(1).findElement(By.cssSelector("ul")).getText();
+		System.out.println("What you'll learn - " + data.learnAbout);
+		
+		
+		
+		
+
+
+				// making dom elements
+		/*
+				org.w3c.dom.Element course_info = newCreatedDocument.createElement("Course");
+								
+				root.appendChild(course_info);
+				{
+					
+					// index
+					org.w3c.dom.Element course_id = newCreatedDocument
+							.createElement("course_id");
+					course_id.appendChild(newCreatedDocument.createTextNode(data.id));
+					course_info.appendChild(course_id);
+					
+					// title
+					org.w3c.dom.Element course_title = newCreatedDocument.createElement("title");
+					course_title.appendChild(newCreatedDocument.createTextNode(data.title));
+					course_info.appendChild(course_title);
+					
+					// provider
+					org.w3c.dom.Element course_provider = newCreatedDocument.createElement("provider");
+					course_provider.appendChild(newCreatedDocument.createTextNode(data.provider));
+					course_info.appendChild(course_provider);
+					
+					// rating
+					org.w3c.dom.Element course_rating = newCreatedDocument.createElement("rating");
+					course_rating.appendChild(newCreatedDocument.createTextNode(data.ratingValue));
+					course_info.appendChild(course_rating);
+					
+					// instructor 
+					org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
+					course_instructor.appendChild(newCreatedDocument.createTextNode(data.instructors));
+					course_info.appendChild(course_instructor);
+					
+					// school
+					org.w3c.dom.Element course_school = newCreatedDocument.createElement("school");
+					course_school.appendChild(newCreatedDocument.createTextNode(data.school));
+					course_info.appendChild(course_school);
+					
+					
+					// description
+					org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
+					course_description.appendChild(newCreatedDocument.createTextNode(data.description));
+					course_info.appendChild(course_description);
+					
+					// url
+					org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
+					course_url.appendChild(newCreatedDocument.createTextNode(data.url));
+					course_info.appendChild(course_url);
+					
+										
+				}*/
+		
+		
+			driver.close();
+		}
+		//}).start();
+	//}
+
+	
+}
