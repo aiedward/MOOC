@@ -90,7 +90,10 @@ public class Tool {
 						for(int i=0; i<hrefs.size(); i++){
 							
 							
-							// can assign title, provider, course-id, reviewValue, and reviewCount
+							// can assign title, provider, course-id, reviewValue, and 
+
+							
+							
 							
 //							courseData.title = hrefs.get(i).select("a[data-analytics-course").text().toString();
 //							courseData.provider = hrefs.get(i).select("a[data-analytics-course").attr("data-analytics-provider").toString();
@@ -196,15 +199,7 @@ public class Tool {
 				}
 				
 				data.url = url;
-//				
-//				if(url.equals("http://www.ted.com/talks/john_legend_true_colors")){
-//					// This talk isn't provided in TED.com currently.
-//					System.out.println("This talk isn't provided in TED.com");
-//					return;
-//				}else{
-//					data.url = url;
-//				}
-//				
+	
 				Element body = document.body();
 				
 				Element basic_info = body.getElementById("outbound");
@@ -230,25 +225,27 @@ public class Tool {
 				
 				// course_description
 				try{
-					data.description = metadata.get(2).text();
+					data.description = metadata.get(2).text().replace('&', '-');
 				}catch(Exception e){
 					
 					data.description = "no description";
 				}
 				
+				data.reviewCount = body.getElementById("reviews").select("h2.heading--underlined").text().split(" ")[0];
+				
+							
 				
 				
-				
-//				Elements description = metadata.get(2).select("p").text();
-//				for (Element element : description) {
-//					try{
-//						data.description.concat(element.text());
-//					}catch(Exception e){
-//						data.description= " ";
-//					}
-//					
-//								
-//				}
+				Elements description = metadata.get(2).select("p");
+				for (Element element : description) {
+					try{
+						data.description.concat(element.text());
+					}catch(Exception e){
+						data.description= "no description";
+					}
+					
+								
+				}
 				
 				// making dom elements
 				org.w3c.dom.Element course_info = newCreatedDocument.createElement("Course");
@@ -277,6 +274,12 @@ public class Tool {
 					course_rating.appendChild(newCreatedDocument.createTextNode(data.ratingValue));
 					course_info.appendChild(course_rating);
 					
+					
+					// revirw Count
+					org.w3c.dom.Element review_count = newCreatedDocument.createElement("review_count");
+					review_count.appendChild(newCreatedDocument.createTextNode(data.reviewCount));
+					course_info.appendChild(review_count);
+					
 					// instructor 
 					org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
 					course_instructor.appendChild(newCreatedDocument.createTextNode(data.instructors));
@@ -287,7 +290,7 @@ public class Tool {
 					course_school.appendChild(newCreatedDocument.createTextNode(data.school));
 					course_info.appendChild(course_school);
 					
-					
+										
 					// description
 					org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
 					course_description.appendChild(newCreatedDocument.createTextNode(data.description));

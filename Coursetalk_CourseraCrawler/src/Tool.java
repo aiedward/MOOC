@@ -225,6 +225,11 @@ public class Tool {
 				// course provider
 				data.provider = basic_info.attr("data-analytics-provider");
 				
+				
+				// review count
+				data.reviewCount = body.getElementById("reviews").select("h2.heading--underlined").text().split(" ")[0];
+				
+				
 						
 				Elements metadata = body.select("div.course-info__academic").first().children();
 				
@@ -265,6 +270,12 @@ public class Tool {
 					org.w3c.dom.Element course_rating = newCreatedDocument.createElement("rating");
 					course_rating.appendChild(newCreatedDocument.createTextNode(data.ratingValue));
 					course_info.appendChild(course_rating);
+					
+					// revirw Count
+					org.w3c.dom.Element review_count = newCreatedDocument.createElement("review_count");
+					review_count.appendChild(newCreatedDocument.createTextNode(data.reviewCount));
+					course_info.appendChild(review_count);
+					
 					
 					// instructor 
 					org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
