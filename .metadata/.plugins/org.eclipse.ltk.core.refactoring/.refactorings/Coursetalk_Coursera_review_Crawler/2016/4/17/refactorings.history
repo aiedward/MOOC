@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete 2 elements from project &apos;Coursetalk_Coursera_review_Crawler&apos;&#x0D;&#x0A;- Original project: &apos;Coursetalk_Coursera_review_Crawler&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     courses_url_edX_20160405_Xseries.txt&#x0D;&#x0A;     courses_url_edX_20160405.txt" description="Delete elements" element1="courses_url_edX_20160405_Xseries.txt" element2="courses_url_edX_20160405.txt" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="2" stamp="1460993866239" subPackages="false" version="1.0"/>
+</session>

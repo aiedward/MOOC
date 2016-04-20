@@ -1,16 +1,16 @@
-import java.awt.List;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -22,121 +22,33 @@ public class Tool {
 	int index = 0;
 	ArrayList<Integer> pagelist = new ArrayList<Integer>(); 
 	Data courseData = new Data();
+	final WebDriver driver = new FirefoxDriver();
+	int urlSize = 0;
 	
-	
-	public ArrayList<String> getAllVideoURL(final String targetSITE)
-	{
+	public ArrayList<String> getVideoURL() throws IOException{
 		
-		final ArrayList<String> urlList=new ArrayList<String>();
+		FileInputStream inputFile = new FileInputStream("./courses_url_edX.txt");
 		
+		// Construct BufferReader from inputStreamReader
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
 		
-		Integer mpage=new Integer(1);
-														
-		String urlString = targetSITE.concat("?page=").concat(
-				String.valueOf(mpage));
+		final ArrayList<String> urlList = new ArrayList<String>();
 		
-		pagelist.add(mpage);
+		String line = null;
 		
-		// jSoup Connection instance 
-		Connection mainConn;
-		Document mainDom = null;
-		mainConn = Jsoup.connect(urlString).timeout(0);
-
-		try {
-			mainDom = mainConn.get();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// read url line by line 
+		while ( (line = fileReader.readLine()) != null){
+			urlList.add(line);
 		}
 		
-		Elements nav = mainDom.getElementsByTag("main").first().child(0)
-				.getElementsByClass("course-listing__leftpanel").first().child(3).select("li");
-				
-		final int pageSize = Integer.valueOf(nav.get(nav.size()-2).text());
-		System.out.println(pageSize);
+		fileReader.close();
 		
-											
-		while (true) {
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					
-					Integer mpage=new Integer(page);
-					++page;
-															
-					String urlString = targetSITE.concat("?page=").concat(
-							String.valueOf(mpage));
-					
-					pagelist.add(mpage);
-					
-					// jSoup Connection instance 
-					Connection mainConn;
-					Document mainDom = null;
-					mainConn = Jsoup.connect(urlString).timeout(0);
-
-					try {
-						mainDom = mainConn.get();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-							.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
-					if( mpage <= pageSize){
-						
-						for(int i=0; i<hrefs.size(); i++){
-							
-							
-							// can assign title, provider, course-id, reviewValue, and reviewCount
-							
-//							courseData.title = hrefs.get(i).select("a[data-analytics-course").text().toString();
-//							courseData.provider = hrefs.get(i).select("a[data-analytics-course").attr("data-analytics-provider").toString();
-//							courseData.id = hrefs.get(i).select("a[data-analytics-course").attr("data-analytics-course-id").toString();
-//							courseData.reviewValue = hrefs.get(i).select("meta[itemprop]").get(0).attr("content").toString();
-//							courseData.reviewCount = hrefs.get(i).select("li.course-listing-summary__ratings__number").text().toString().split(" ")[0];
-//							
-							courseData.url = hrefs.get(i).select("a[data-analytics-course").attr("href").toString();
-							
-							urlList.add(courseData.url);
-												
-						}
-					
-					}else{
-						endData = true;
-					}
-						
-				}
-			}).start();
-			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
-			if(endData)
-			{
-				//threadLock
-				while(Thread.activeCount()!=1)
-				{
-				}
-				for (String string : urlList) {
-					System.out.print(string+"\n");
-				}
-
-				System.out.print("-----Url size(the number of Courses in couretalk.com)------\n");
-				System.out.print(urlList.size()+"\n");
-				return urlList;
-				
-			}
+		urlSize = urlList.size();
 		
-		}
+		return urlList; 
+		
 	}
-	
+		
 	/*
 	 * End of get All url function
 	 */
@@ -169,139 +81,204 @@ public class Tool {
 	 * 
 	 */
 	
-	public void crawlData(final String url, final Integer index){
+	public void crawlData(final String url, final Integer index) throws IOException{
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				Connection connection;
-				connection = Jsoup.connect(url).timeout(0);
+		
+		
+		// open website
+		driver.navigate().to(url);
+		
+		try{
+			Thread.sleep(1000*3);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		// newCreatedDocument is destination of XML.
+		NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
+		Node root=nodelist.item(0);
 				
-				// newCreatedDocument is destination of XML.
-				NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
-				Node root=nodelist.item(0);
-				
-				Document document = null;
-				
-				Data data = new Data();
-				data.keyword = new ArrayList<String>();
-				data.tag = new ArrayList<String>();
-
-
-				try {
-					document = connection.get();
-				} catch (Exception e) {
-				}
-				
-				data.url = url;
-//				
-//				if(url.equals("http://www.ted.com/talks/john_legend_true_colors")){
-//					// This talk isn't provided in TED.com currently.
-//					System.out.println("This talk isn't provided in TED.com");
-//					return;
-//				}else{
-//					data.url = url;
-//				}
-//				
-				Element body = document.body();
-				
-				Element basic_info = body.getElementById("outbound");
-				
-				// course title
-				data.title = basic_info.attr("data-analytics-course");
-				// course-id
-				data.id = basic_info.attr("data-course-id");
-				// course-url
-				data.url = basic_info.attr("href");
-				// course rating
-				data.ratingValue = basic_info.attr("data-analytics-rating").toString();
-				// course provider
-				data.provider = basic_info.attr("data-analytics-provider");
-				
+		
+		Data data = new Data();
 						
-				Elements metadata = body.select("div.course-info__academic").first().children();
-				
-				// course_instructors
-				data.instructors = metadata.get(0).text();
-				// providing school				
-				data.school = metadata.get(1).text();
-				
-				// course_description
-				try{
-					data.description = metadata.get(2).text();
-				}catch(Exception e){
-					
-					data.description = "no description";
-				}
-				
-				
-				
-				
-//				Elements description = metadata.get(2).select("p").text();
-//				for (Element element : description) {
-//					try{
-//						data.description.concat(element.text());
-//					}catch(Exception e){
-//						data.description= " ";
-//					}
-//					
-//								
-//				}
-				
-				// making dom elements
-				org.w3c.dom.Element course_info = newCreatedDocument.createElement("Course");
-								
-				root.appendChild(course_info);
-				{
-					
-					// index
-					org.w3c.dom.Element course_id = newCreatedDocument
-							.createElement("course_id");
-					course_id.appendChild(newCreatedDocument.createTextNode(data.id));
-					course_info.appendChild(course_id);
-					
-					// title
-					org.w3c.dom.Element course_title = newCreatedDocument.createElement("title");
-					course_title.appendChild(newCreatedDocument.createTextNode(data.title));
-					course_info.appendChild(course_title);
-					
-					// provider
-					org.w3c.dom.Element course_provider = newCreatedDocument.createElement("provider");
-					course_provider.appendChild(newCreatedDocument.createTextNode(data.provider));
-					course_info.appendChild(course_provider);
-					
-					// rating
-					org.w3c.dom.Element course_rating = newCreatedDocument.createElement("rating");
-					course_rating.appendChild(newCreatedDocument.createTextNode(data.ratingValue));
-					course_info.appendChild(course_rating);
-					
-					// instructor 
-					org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
-					course_instructor.appendChild(newCreatedDocument.createTextNode(data.instructors));
-					course_info.appendChild(course_instructor);
-					
-					// school
-					org.w3c.dom.Element course_school = newCreatedDocument.createElement("school");
-					course_school.appendChild(newCreatedDocument.createTextNode(data.school));
-					course_info.appendChild(course_school);
-					
-					
-					// description
-					org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
-					course_description.appendChild(newCreatedDocument.createTextNode(data.description));
-					course_info.appendChild(course_description);
-					
-					// url
-					org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
-					course_url.appendChild(newCreatedDocument.createTextNode(data.url));
-					course_info.appendChild(course_url);
-					
-										
-				}
+		data.url = url;
+		
+		data.id = driver.findElement(By.id("course-info-page")).getAttribute("data-course-id").toString();
+		System.out.println(data.id);
+
+	
+		ArrayList <WebElement> metadata = new ArrayList <WebElement> (driver
+				.findElements(By.tagName("meta")));
+		
+		System.out.println("meta data size - " + metadata.size());
+		
+		
+		
+		for(int i=0; i<metadata.size(); i++){
+			WebElement element = metadata.get(i);
+			
+			if(element.getAttribute("property") == null){
+				continue;
 			}
-		}).start();
+								
+			if(element.getAttribute("property").equals("og:title")){
+				//course title
+				data.title = element.getAttribute("content").toString();
+				System.out.println("title - " +data.title);
+				
+			}else if(element.getAttribute("property").equals("og:description")){
+				//course intro
+				data.intro = element.getAttribute("content").toString();
+				System.out.println("intro - " +data.intro);
+				
+			}else if(element.getAttribute("property").equals("article:published_time")){
+				// course published time
+				data.date = element.getAttribute("content").toString();
+				System.out.println("published date - " +data.date);
+				
+				// break loop when assign three values
+				break;
+			}
+			
+		}
+
+		// Parsing course-Summary
+		//System.out.println(driver.findElement(By.id("course-summary-area")).findElements(By.cssSelector("li")).get(1).getText());
+		
+		ArrayList <WebElement> Summary = new ArrayList <WebElement> (driver.findElement(By.id("course-summary-area"))
+				.findElements(By.cssSelector("li")) );
+		
+		for(int i=0; i<Summary.size(); i++){
+			
+			if(Summary.get(i).getAttribute("data-field") == null){
+				continue;
+			}
+			
+			if(Summary.get(i).getAttribute("data-field").equals("school")){
+				data.school = Summary.get(i).getText();
+				System.out.println("school - " + data.school);
+			}else if(Summary.get(i).getAttribute("data-field").equals("subject")){
+				data.subject = Summary.get(i).getText();
+				System.out.println("subject - " + data.subject);
+			}else if(Summary.get(i).getAttribute("data-field").equals("level")){
+				data.level = Summary.get(i).getText();
+				System.out.println("level - " + data.level);
+				
+				// break loop when assign three values
+				break;
+			}
+			
+		}
+		
+		// Parsing course-about
+		
+		ArrayList <WebElement> Detail = new ArrayList <WebElement> (driver.findElement(By.id("course-about-area"))
+				.findElements(By.cssSelector("div.content-grouping")) );
+		
+		try{
+			data.description = Detail.get(0).findElement(By.cssSelector("div.see-more-content")).getText();
+			System.out.println("description - " + data.description);
+			
+		}catch(Exception e){
+			data.description = "no description";
+		}
+		
+		try{
+
+			data.learnAbout = Detail.get(1).findElement(By.cssSelector("ul")).getText().toString();
+			System.out.println("What you'll learn - " + data.learnAbout);
+			
+		}catch(Exception e){
+			data.learnAbout = "no info";
+		}
+		
+
+		// making dom elements
+		
+		org.w3c.dom.Element course_info = newCreatedDocument.createElement("CourseInfo");
+						
+		root.appendChild(course_info);
+		{
+			
+			// index
+			org.w3c.dom.Element course_id = newCreatedDocument
+					.createElement("course_id");
+			course_id.appendChild(newCreatedDocument.createTextNode(data.id));
+			course_info.appendChild(course_id);
+						
+			// title
+			org.w3c.dom.Element course_title = newCreatedDocument.createElement("title");
+			course_title.appendChild(newCreatedDocument.createTextNode(data.title));
+			course_info.appendChild(course_title);
+			
+			// published_date
+			org.w3c.dom.Element published_date = newCreatedDocument.createElement("published_date");
+			published_date.appendChild(newCreatedDocument.createTextNode(data.date));
+			course_info.appendChild(published_date);
+
+			// course intro
+			org.w3c.dom.Element course_intro = newCreatedDocument.createElement("course_intro");
+			course_intro.appendChild(newCreatedDocument.createTextNode(data.intro));
+			course_info.appendChild(course_intro);
+
+//			// provider
+//			org.w3c.dom.Element course_provider = newCreatedDocument.createElement("provider");
+//			course_provider.appendChild(newCreatedDocument.createTextNode(data.provider));
+//			course_info.appendChild(course_provider);
+//			
+			// subject
+			org.w3c.dom.Element course_subject = newCreatedDocument.createElement("subject");
+			course_subject.appendChild(newCreatedDocument.createTextNode(data.subject));
+			course_info.appendChild(course_subject);
+			
+			
+			// level
+			org.w3c.dom.Element course_level = newCreatedDocument.createElement("level");
+			course_level.appendChild(newCreatedDocument.createTextNode(data.level));
+			course_info.appendChild(course_level);
+			
+//			// instructor 
+//			org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
+//			course_instructor.appendChild(newCreatedDocument.createTextNode(data.instructors));
+//			course_info.appendChild(course_instructor);
+//			
+			// school
+			org.w3c.dom.Element course_school = newCreatedDocument.createElement("school");
+			course_school.appendChild(newCreatedDocument.createTextNode(data.school));
+			course_info.appendChild(course_school);
+			
+			
+			// description
+			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
+			if(data.description == null){
+				course_description.appendChild(newCreatedDocument.createTextNode("no description"));
+			}else{
+				course_description.appendChild(newCreatedDocument.createTextNode(data.description));
+			}		
+			course_info.appendChild(course_description);
+			
+			// learn about
+			org.w3c.dom.Element learn_about = newCreatedDocument.createElement("learn_about");
+			if(data.learnAbout == null){
+				learn_about.appendChild(newCreatedDocument.createTextNode("no learn"));
+				
+			}else{
+				learn_about.appendChild(newCreatedDocument.createTextNode(data.learnAbout));
+			}
+			course_info.appendChild(learn_about);
+			
+			// url
+			org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
+			course_url.appendChild(newCreatedDocument.createTextNode(data.url));
+			course_info.appendChild(course_url);
+			
+								
+		}
+
+		if(index == urlSize){
+			driver.close();
+		}
+	
 	}
 
 	
