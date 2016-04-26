@@ -1,0 +1,160 @@
+package JaccardSimil;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.sun.javafx.collections.MappingChange.Map;
+
+public class Tool {
+	
+	private int SimilMatrix[][];
+	ArrayList<Topic> topicList;
+	
+	
+	public ArrayList<String> getData() throws IOException{
+			
+		FileInputStream inputFile = new FileInputStream("./test.txt");
+		
+		
+		
+		// Construct BufferReader from inputStreamReader
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
+
+		
+		// Topics included in the Layer, the type of the keywords is currently 'Activity'
+		String[] matchingTarget = fileReader.readLine().split(",");
+		topicList = new ArrayList<Topic>();
+		
+		
+		// adding topics to topic list
+		System.out.println("Current target type is 'activity'  ");
+		for(String keyword : matchingTarget){
+			topicList.add(new Topic(keyword));
+					
+		}
+		// delete null index
+		topicList.remove(0);
+		
+		this.SimilMatrix = new int[topicList.size()][topicList.size()];
+		
+	
+		final ArrayList<String> postingList = new ArrayList<String>();
+		
+		String line = null;
+		String[] lineArr;
+		
+		// temporary arraylist to store intersection
+		ArrayList<String> tempKeywords = new ArrayList<String>();
+		//ArrayList<Integer> tempIndex = new ArrayList<Integer>();
+		//HashMap<Integer, ArrayList<Integer>> IndexMap = new HashMap<Integer, ArrayList<Integer>>();
+		int count =0;
+		// read url line by line 
+		while ( (line = fileReader.readLine()) != null){
+			
+			count++;
+						
+			tempKeywords.clear();
+			
+			line.replace("  ", " ");
+			line.replace("   ", " ");
+					
+			lineArr = line.split(" ");
+			for( String token : lineArr){
+
+				for(int i=0; i<topicList.size(); i++){
+					if( topicList.get(i).compare(token)){
+						tempKeywords.add(topicList.get(i).name);
+										
+					}
+					
+				}
+			}
+			
+			if(tempKeywords.size() > 1){
+				System.out.println("size of co-occurrence list " + tempKeywords.size());
+				// add co-occurrence count(intersection) to Similarity Matrix
+				for(int i=0; i<tempKeywords.size(); i++){
+					for( int j=i; j<tempKeywords.size(); j++){
+						this.SimilMatrix[getIndexByname(tempKeywords.get(i))][getIndexByname(tempKeywords.get(j))]++;
+								
+						System.out.println("line index " + count + "- adding intersection count to - "
+								+ tempKeywords.get(i) + " , " + tempKeywords.get(j)
+								+ " currently count of SimilMatrix["+getIndexByname(tempKeywords.get(i))
+								+"]["+getIndexByname(tempKeywords.get(j))+"] = " 
+								+  this.SimilMatrix[getIndexByname(tempKeywords.get(i))][getIndexByname(tempKeywords.get(j))]);
+						
+					}										
+					
+				}
+			}
+		
+		}
+		
+		
+		
+		fileReader.close();
+		
+		
+		
+		for(int i=0; i<topicList.size(); i++){
+			System.out.println(topicList.get(i).name + "'s frequency = " + topicList.get(i).tf);
+		}
+		
+		writeData("intersection_count");
+			
+		return postingList; 
+		
+	}
+	
+	public int getIndexByname(String name){
+		for(int i=0; i<topicList.size();i++){
+			if(topicList.get(i).name.equals(name.toLowerCase())){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	
+	public void writeData(String filename){
+		String name = "./"+filename+".txt";
+		try{
+	    	////////////////////////////////////////////////////////////////
+			BufferedWriter out = new BufferedWriter(new FileWriter(name));
+	    	String s = "before calculating Jaccard similarity";
+	    	      
+	    	out.write(s);out.newLine();
+	    	
+	    	for (int i = 1; i <= topicList.size(); i++){
+	    		s = "\t" + Integer.toString(i);
+	    		out.write(s);
+	    	}
+	    	out.newLine();
+	    	
+	    	for (int source = 0; source <= topicList.size(); source++){
+	    		s = Integer.toString(source)+"\t";
+	    	    out.write(s);
+	    	    for (int destination = 0; destination <= topicList.size(); destination++){
+	    	    	s = Integer.toString(this.SimilMatrix[source][destination])+"\t";
+	    	    	out.write(s);
+	    	    }
+	    	    out.newLine();
+	    	}
+	    	out.close();
+	    	   
+	    	}catch (IOException e){
+	    		System.err.println(e); 
+	    	    System.exit(1);
+	    	}
+
+	}
+	
+	
+}

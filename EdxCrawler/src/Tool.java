@@ -1,13 +1,11 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -27,12 +25,58 @@ public class Tool {
 	
 	public ArrayList<String> getVideoURL() throws IOException{
 		
+		driver.navigate().to("https://www.edx.org/course");
+		
+		final ArrayList<String> urlList = new ArrayList<String>();
+		boolean plag = false;
+		int position = 1000;
+		while(!plag){
+			
+			((JavascriptExecutor)driver).executeScript("scroll(0,"+position + ")");
+						
+			if(! (driver.findElements(By.cssSelector("[class='loading']")).size() > 0)){
+				plag = true;
+			}
+			
+					
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			position += 1000;
+			
+			
+		}
+		
+		ArrayList <WebElement> url_list = new ArrayList<WebElement>(driver.findElements(By.cssSelector("div.course-card")));
+			
+		int size_of_url = url_list.size();
+		
+		for(int i=0; i<size_of_url; i++){
+			
+			String url = url_list.get(i).findElement(By.tagName("a")).getAttribute("href").toString();
+			
+			if(url.contains("xseries")){
+				continue;
+			}else{
+				urlList.add(url);
+				System.out.println(url);
+			}
+			
+			
+		}
+			
+			
+		
+		/*
 		FileInputStream inputFile = new FileInputStream("./courses_url_edX.txt");
 		
 		// Construct BufferReader from inputStreamReader
 		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
 		
-		final ArrayList<String> urlList = new ArrayList<String>();
+		
 		
 		String line = null;
 		
@@ -42,8 +86,11 @@ public class Tool {
 		}
 		
 		fileReader.close();
+		*/
+		
 		
 		urlSize = urlList.size();
+		System.out.println("size of url - " + urlSize);
 		
 		return urlList; 
 		
@@ -88,8 +135,9 @@ public class Tool {
 		// open website
 		driver.navigate().to(url);
 		
+		// sleep 10 seconds
 		try{
-			Thread.sleep(1000*3);
+			Thread.sleep(1000*10);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -160,6 +208,10 @@ public class Tool {
 			}else if(Summary.get(i).getAttribute("data-field").equals("subject")){
 				data.subject = Summary.get(i).getText();
 				System.out.println("subject - " + data.subject);
+			}else if(Summary.get(i).getAttribute("data-field").equals("price")){
+				data.price = Summary.get(i).getText();
+				System.out.println("Price - " + data.price);
+				
 			}else if(Summary.get(i).getAttribute("data-field").equals("level")){
 				data.level = Summary.get(i).getText();
 				System.out.println("level - " + data.level);

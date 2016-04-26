@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="org.w3c.dom.Element"/>
-<fullyQualifiedTypeName name="org.openqa.selenium.WebElement"/>
 <fullyQualifiedTypeName name="org.openqa.selenium.By.ByTagName"/>
 <fullyQualifiedTypeName name="org.openqa.selenium.By"/>
 <fullyQualifiedTypeName name="java.lang.Exception"/>
+<fullyQualifiedTypeName name="java.io.FileReader"/>
+<fullyQualifiedTypeName name="com.sun.javafx.collections.MappingChange.Map"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.lang.Float"/>
+<fullyQualifiedTypeName name="org.openqa.selenium.WebElement"/>
 <fullyQualifiedTypeName name="java.lang.Thread"/>
 </qualifiedTypeNameHistroy>

@@ -1,0 +1,50 @@
+package JaccardSimil;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class convert {
+	private ArrayList<String> relation_topic = new ArrayList<String>();
+	
+	public void convertData(String filename){
+		String name = "src/"+filename+".txt";
+		try{
+			File aFile = new File(name);
+			
+			FileReader fileReader = new FileReader(aFile);
+			BufferedReader reader = new BufferedReader(fileReader);
+			
+			String readString = null;
+			
+			while((readString = reader.readLine()) != null){
+				readString = readString.replace(" ", "");
+				readString = readString.replace(",", " ");
+				relation_topic.add(readString);
+			}
+			reader.close();
+		}catch(Exception ex){
+		}
+		
+		try{
+	    	////////////////////////////////////////////////////////////////
+			BufferedWriter out = new BufferedWriter(new FileWriter(name));
+	    	String s = "topic_A topic_B";
+	    	      
+	    	out.write(s);out.newLine();
+	    	for (int i = 0; i < relation_topic.size(); i++){
+	    		s = relation_topic.get(i);
+	    		out.write(s);
+	    		out.newLine();
+	    	}
+	    	out.close();
+	    	}catch (IOException e){
+	    		System.err.println(e); 
+	    	    System.exit(1);
+	    	}
+	}
+}

@@ -21,6 +21,11 @@ public class Data {
 	 * url of the talk
 	 */
 	
+	
+	// Price
+	public String price;
+	
+	
 	public String course_index;
 	
 	public String url;

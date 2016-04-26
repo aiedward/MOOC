@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move 3 elements to &apos;library&apos;&#x0D;&#x0A;- Original project: &apos;EdxCrawler&apos;&#x0D;&#x0A;- Destination element: &apos;library&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     selenium-java-2.53.0-srcs.jar&#x0D;&#x0A;     selenium-java-2.53.0.jar&#x0D;&#x0A;     selenium-server-standalone-2.53.0.jar&#x0D;&#x0A;- Update references to refactored element" description="Move files" element1="selenium-java-2.53.0-srcs.jar" element2="selenium-java-2.53.0.jar" element3="selenium-server-standalone-2.53.0.jar" files="3" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1461634127294" target="library" units="0" version="1.0"/>
+</session>

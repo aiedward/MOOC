@@ -1,0 +1,15 @@
+package JaccardSimil;
+
+public class Topic {
+	int tf;
+	String name;
+	
+	Topic(String Name){
+		this.name = Name;
+	}
+	
+	void addFrequency(){
+		tf ++;
+	}
+	
+}

@@ -1,0 +1,25 @@
+package JaccardSimil;
+
+public class Topic {
+	int tf;
+	String name;
+	
+	Topic(String Name){
+		this.name = Name;
+		this.tf = 0;
+	}
+	
+	public void addFrequency(){
+		tf++;
+	}
+	
+	public void compare(String target){
+		if(name.equals(target.toLowerCase())){
+			tf++;
+		}else if(target.toLowerCase().contains(name)){
+			tf++;
+		}
+		
+	}
+	
+}
