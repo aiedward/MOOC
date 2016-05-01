@@ -1,5 +1,8 @@
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -9,8 +12,11 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 
 
 public class Tool {
@@ -18,7 +24,9 @@ public class Tool {
 	boolean endData=false;
 	int page = 1;
 	int index = 0;
-	ArrayList<Integer> pagelist = new ArrayList<Integer>(); 
+	ArrayList<Integer> pagelist = new ArrayList<Integer>();
+	ArrayList<String> instructorList = new ArrayList<String>();
+	
 	Data courseData = new Data();
 	final WebDriver driver = new FirefoxDriver();
 	int urlSize = 0;
@@ -30,6 +38,7 @@ public class Tool {
 		final ArrayList<String> urlList = new ArrayList<String>();
 		boolean plag = false;
 		int position = 1000;
+//		int count = 0;
 		while(!plag){
 			
 			((JavascriptExecutor)driver).executeScript("scroll(0,"+position + ")");
@@ -40,13 +49,18 @@ public class Tool {
 			
 					
 			try {
-				Thread.sleep(200);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			position += 1000;
 			
+			
+//			if(count==10){
+//				break;
+//			}
+//			count++;	
 			
 		}
 		
@@ -58,6 +72,7 @@ public class Tool {
 			
 			String url = url_list.get(i).findElement(By.tagName("a")).getAttribute("href").toString();
 			
+			// xseries 강의들은 제외하고 list에 담는다.
 			if(url.contains("xseries")){
 				continue;
 			}else{
@@ -123,6 +138,15 @@ public class Tool {
 		
 	}
 	
+	// To prevent occurring null pointer exception during transforming XML
+	public static Text createTextNodeWithoutNull(Document doc, String str){
+		Text textNode;
+		if(str != null) textNode = doc.createTextNode(str);
+		else textNode = doc.createTextNode("null");
+		
+		return textNode;
+	}
+	
 	/*
 	 * Crawl data.
 	 * 
@@ -134,10 +158,10 @@ public class Tool {
 		
 		// open website
 		driver.navigate().to(url);
-		
-		// sleep 10 seconds
+				
+		// sleep 10 seconds to wait until onload
 		try{
-			Thread.sleep(1000*10);
+			Thread.sleep(1000*6);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -197,7 +221,7 @@ public class Tool {
 				.findElements(By.cssSelector("li")) );
 		
 		for(int i=0; i<Summary.size(); i++){
-			
+			// Sometimes attributes are not assigned with 'data-field'
 			if(Summary.get(i).getAttribute("data-field") == null){
 				continue;
 			}
@@ -214,8 +238,14 @@ public class Tool {
 				
 			}else if(Summary.get(i).getAttribute("data-field").equals("level")){
 				data.level = Summary.get(i).getText();
-				System.out.println("level - " + data.level);
-				
+				System.out.println("level - " + data.level); 
+			}else if(Summary.get(i).getAttribute("data-field").equals("language")){
+			
+				try{
+					data.language = Summary.get(i).getText();
+				}catch(Exception e){
+					data.language = "no language";
+				}
 				// break loop when assign three values
 				break;
 			}
@@ -224,11 +254,27 @@ public class Tool {
 		
 		// Parsing course-about
 		
-		ArrayList <WebElement> Detail = new ArrayList <WebElement> (driver.findElement(By.id("course-about-area"))
+		ArrayList <WebElement> course_Detail = new ArrayList <WebElement> (driver.findElement(By.id("course-about-area"))
 				.findElements(By.cssSelector("div.content-grouping")) );
 		
+		// Before parsing course_about, we need to span the element of description.
+		// interact(click) with "see more" and validate whether the element is exist.
+		List<WebElement> more_content = course_Detail.get(0).findElements(By.linkText("See more"));
+		
+		if(more_content.size()>0){
+			more_content.get(0).click();
+		}
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		// after interacting with the element, parsing description and 'what you'll learn
 		try{
-			data.description = Detail.get(0).findElement(By.cssSelector("div.see-more-content")).getText();
+			data.description = course_Detail.get(0).findElement(By.cssSelector("div.see-more-content")).getText().toString();
 			System.out.println("description - " + data.description);
 			
 		}catch(Exception e){
@@ -237,11 +283,20 @@ public class Tool {
 		
 		try{
 
-			data.learnAbout = Detail.get(1).findElement(By.cssSelector("ul")).getText().toString();
+			data.learnAbout = course_Detail.get(1).findElement(By.cssSelector("ul")).getText().toString();
 			System.out.println("What you'll learn - " + data.learnAbout);
 			
 		}catch(Exception e){
 			data.learnAbout = "no info";
+		}
+		
+		// Parsing instructor page
+		ArrayList <WebElement> instructors = new ArrayList <WebElement> 
+			(driver.findElements(By.cssSelector("li.list-instructor__item")));
+		
+		for(WebElement instructor : instructors){
+			instructorList.add(instructor.findElement(By.tagName("a")).getAttribute("href"));
+			
 		}
 		
 
@@ -255,83 +310,87 @@ public class Tool {
 			// index
 			org.w3c.dom.Element course_id = newCreatedDocument
 					.createElement("course_id");
-			course_id.appendChild(newCreatedDocument.createTextNode(data.id));
+			course_id.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.id));
 			course_info.appendChild(course_id);
 						
 			// title
 			org.w3c.dom.Element course_title = newCreatedDocument.createElement("title");
-			course_title.appendChild(newCreatedDocument.createTextNode(data.title));
+			course_title.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.title));
 			course_info.appendChild(course_title);
 			
 			// published_date
 			org.w3c.dom.Element published_date = newCreatedDocument.createElement("published_date");
-			published_date.appendChild(newCreatedDocument.createTextNode(data.date));
+			published_date.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.date));
 			course_info.appendChild(published_date);
 
 			// course intro
 			org.w3c.dom.Element course_intro = newCreatedDocument.createElement("course_intro");
-			course_intro.appendChild(newCreatedDocument.createTextNode(data.intro));
+			course_intro.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.intro));
 			course_info.appendChild(course_intro);
 
-//			// provider
-//			org.w3c.dom.Element course_provider = newCreatedDocument.createElement("provider");
-//			course_provider.appendChild(newCreatedDocument.createTextNode(data.provider));
-//			course_info.appendChild(course_provider);
-//			
 			// subject
 			org.w3c.dom.Element course_subject = newCreatedDocument.createElement("subject");
-			course_subject.appendChild(newCreatedDocument.createTextNode(data.subject));
+			course_subject.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.subject));
 			course_info.appendChild(course_subject);
 			
+			// price
+			org.w3c.dom.Element course_price = newCreatedDocument.createElement("price");
+			course_price.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.price));
+			course_info.appendChild(course_price);
 			
 			// level
 			org.w3c.dom.Element course_level = newCreatedDocument.createElement("level");
-			course_level.appendChild(newCreatedDocument.createTextNode(data.level));
+			course_level.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.level));
 			course_info.appendChild(course_level);
-			
-//			// instructor 
-//			org.w3c.dom.Element course_instructor = newCreatedDocument.createElement("instructor");
-//			course_instructor.appendChild(newCreatedDocument.createTextNode(data.instructors));
-//			course_info.appendChild(course_instructor);
-//			
+
 			// school
 			org.w3c.dom.Element course_school = newCreatedDocument.createElement("school");
-			course_school.appendChild(newCreatedDocument.createTextNode(data.school));
+			course_school.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.school));
 			course_info.appendChild(course_school);
 			
 			
 			// description
 			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
-			if(data.description == null){
-				course_description.appendChild(newCreatedDocument.createTextNode("no description"));
-			}else{
-				course_description.appendChild(newCreatedDocument.createTextNode(data.description));
-			}		
+			course_description.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.description));
+			
 			course_info.appendChild(course_description);
 			
 			// learn about
 			org.w3c.dom.Element learn_about = newCreatedDocument.createElement("learn_about");
-			if(data.learnAbout == null){
-				learn_about.appendChild(newCreatedDocument.createTextNode("no learn"));
-				
-			}else{
-				learn_about.appendChild(newCreatedDocument.createTextNode(data.learnAbout));
-			}
+					
+			learn_about.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.learnAbout));
 			course_info.appendChild(learn_about);
 			
 			// url
 			org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
-			course_url.appendChild(newCreatedDocument.createTextNode(data.url));
+			course_url.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.url));
 			course_info.appendChild(course_url);
 			
 								
 		}
 
-		if(index == urlSize){
+		if(index == urlSize -1){
+			System.out.println("Last page");
 			driver.close();
+			OutputStream output = new FileOutputStream("instructor_url.txt");
+			
+			for(String instructor : instructorList){
+				System.out.println(instructor);
+				try{
+					output.write((instructor+'\n').getBytes());
+				}catch(Exception e){
+					
+				}
+								
+			}
+			output.close();
+			
+			
 		}
 	
 	}
+	
+	
 
 	
 }

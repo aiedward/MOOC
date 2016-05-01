@@ -24,6 +24,14 @@ public class Data {
 	
 	public String review_data_id;
 	
+	public String reviewer_name;
+	
+	public String other_review;
+	
+	public String other_completed;
+	
+	public String helpful_rate;
+	
 	public String review_date;
 	
 	public String review_value;
