@@ -1,0 +1,207 @@
+package JaccardSimil;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+public class KruskalAlgorithm{
+    private List<Edge> edges;
+    private int numberOfVertices;
+    private int spanning_tree[][];
+    private ArrayList<ArrayList<Integer>> node;
+    private int edgeNum;
+    private ArrayList<String> topic;
+
+    
+    public KruskalAlgorithm(int numberOfVertices){
+    	this.topic = new ArrayList<String>();
+    	this.edgeNum = (numberOfVertices*numberOfVertices)-numberOfVertices;
+        this.numberOfVertices = numberOfVertices;
+        this.edges = new LinkedList<Edge>();
+        this.node = new ArrayList<ArrayList<Integer>>();
+        this.spanning_tree = new int[numberOfVertices + 1][numberOfVertices + 1];
+    }
+ 
+    public void kruskalAlgorithm(int adjacencyMatrix[][]){
+        for (int source = 1; source <= numberOfVertices; source++){
+            for (int destination = source; destination <= numberOfVertices; destination++){
+                if (source != destination){
+                    Edge edge = new Edge();
+                    edge.sourcevertex = source;
+                    edge.destinationvertex = destination;
+                    edge.weight = adjacencyMatrix[source][destination];
+                    edges.add(edge);
+                }
+            }
+        }
+        Collections.sort(edges, new EdgeComparator());
+        for(int i = 0; i < edges.size(); i++){
+        	System.out.println(edges.get(i).weight+": "+edges.get(i).sourcevertex+","+edges.get(i).destinationvertex);
+        }
+       
+        for(Edge edge : edges){
+            spanning_tree[edge.sourcevertex][edge.destinationvertex] = edge.weight;
+            spanning_tree[edge.destinationvertex][edge.sourcevertex] = edge.weight;
+            if(isCycle(edge)){
+                spanning_tree[edge.sourcevertex][edge.destinationvertex] = 0;
+                spanning_tree[edge.destinationvertex][edge.sourcevertex] = 0;
+                edgeNum -= 2;
+            }
+        }
+        System.out.println(edges.size());
+        System.out.print(edgeNum/2);
+       /* System.out.println("After Kruskal Algorithms ");
+        for (int i = 1; i <= numberOfVertices; i++)
+            System.out.print("\t" + i);
+        System.out.println();
+        for (int source = 1; source <= numberOfVertices; source++)
+        {
+            System.out.print(source + "\t");
+            for (int destination = 1; destination <= numberOfVertices; destination++)
+            {
+                System.out.print(spanning_tree[source][destination] + "\t");
+            }
+            System.out.println();
+        }*/
+    }
+    
+    public boolean isCycle(Edge e){
+    	int tree_1 = -1;
+    	int tree_2 = -1;
+    	for(int i = 0; i < node.size(); i++){
+    		System.out.println(node.get(i));
+    		for(int j = 0; j < node.get(i).size(); j++){
+    			if(node.get(i).get(j) == (e.destinationvertex)){
+        			tree_1 = i;
+    			}
+        		
+        		if(node.get(i).get(j) == (e.sourcevertex)){
+        			tree_2 = i;
+        		}
+    			/*if(node.get(i).contains(e.destinationvertex)){
+        			tree_1 = i;
+        		}else{
+        			tree_1 = -1;
+        		}
+        		
+        		if(node.get(i).contains(e.sourcevertex)){
+        			tree_2 = i;
+        		}else{
+        			tree_2 = -1;
+        		}*/
+    		}
+    		
+    	}
+    	if(tree_1 == -1 && tree_2 == -1){
+    		ArrayList<Integer> temp = new ArrayList<Integer>();
+    		temp.add(e.sourcevertex);
+    		temp.add(e.destinationvertex);
+    		node.add(temp);
+    		return false;
+    	}else if(tree_1 == tree_2){
+    		return true;
+    	}else if((tree_1 == -1) || (tree_2 == -1)){
+    		if(tree_1 == -1){
+    			node.get(tree_2).add(e.destinationvertex);
+    		}else if(tree_2 == -1){
+    			node.get(tree_1).add(e.sourcevertex);
+    		}
+    		return false;
+    	}else{
+    		for(int i = 0; i < node.get(tree_1).size(); i++){
+    			node.get(tree_2).add(node.get(tree_1).get(i));
+    		}
+    		node.remove(tree_1);
+    		return false;
+    	}
+    }
+   
+    public void readTopic(HashMap<Integer,ArrayList<String>> data){
+    	for(int i = 0; i < data.size(); i++){
+    		topic.add(data.get(i).get(0));
+    	}
+    }
+    
+    public void writeData(String filename){
+    	String name = "src/"+filename+".txt";
+    	try {
+    	      BufferedWriter out = new BufferedWriter(new FileWriter(name));
+    	      String s = "After Kruskal Algorithms "+"("+filename+")";
+    	      
+    	      out.write(s);out.newLine();
+    	        for (int i = 1; i <= numberOfVertices; i++){
+    	        	s = "\t" + Integer.toString(i);
+    	        	out.write(s);
+    	        }
+    	        out.newLine();
+    	        for (int source = 1; source <= numberOfVertices; source++)
+    	        {
+    	        	s = Integer.toString(source)+"\t";
+    	        	out.write(s);
+    	            for (int destination = 1; destination <= numberOfVertices; destination++)
+    	            {
+    	            	s = Integer.toString(spanning_tree[source][destination])+"\t";
+        	        	out.write(s);
+    	            }
+    	            out.newLine();
+    	        }
+    	        out.close();
+    	    } catch (IOException e) {
+    	        System.err.println(e);
+    	        System.exit(1);
+    	    }
+
+    }
+    public void writeData2(String filename){
+    	String name = "src/"+filename+".txt";
+    	try{
+    		BufferedWriter out = new BufferedWriter(new FileWriter(name));
+    	    String s = "Topic Relation ";
+    	    for (int source = 1; source <= numberOfVertices; source++){
+    	    	for (int destination = source; destination <= numberOfVertices; destination++){
+    	    		if(spanning_tree[source][destination] != 0){
+    	    			//s = topic.get(source-1)+","+topic.get(destination-1)+","+spanning_tree[source][destination];
+    	    			s = topic.get(source-1)+","+topic.get(destination-1);
+    	    			out.write(s);
+    	    			out.newLine();
+    	    		}
+    	    	}
+    	    
+    	    }
+    		out.close();
+    	    } catch (IOException e) {
+    	        System.err.println(e);
+    	        System.exit(1);
+    	    }
+
+    }
+}
+
+ 
+class Edge{
+	int sourcevertex;
+	int destinationvertex;
+    int weight;
+}
+ 
+
+class EdgeComparator implements Comparator<Edge>{
+    @Override
+    public int compare(Edge edge1, Edge edge2)
+    {
+        if (edge1.weight > edge2.weight)
+            return -1;
+        if (edge1.weight < edge2.weight)
+            return 1;
+        return 0;
+    }
+}
+ 
+
+	
+

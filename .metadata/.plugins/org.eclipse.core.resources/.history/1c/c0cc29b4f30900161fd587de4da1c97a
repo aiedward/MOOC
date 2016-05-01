@@ -1,0 +1,317 @@
+package TopicClustering;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
+public class SimilarityAlgorithm {
+	private HashMap<Integer,ArrayList<String>> data;
+	public HashMap<Integer, ArrayList<String>> getData() {
+		return data;
+	}
+	private ArrayList<String> keyword = null;	
+	//중복 안된 데이터 저장
+	
+	
+	private HashMap<Integer,ArrayList<String>> data_idf = null;
+	private ArrayList<String> all_keyword;
+	//IDF 만들기 위한 임시 저장
+	
+	
+	private HashMap<String,Double> IDF = null; //topic과 IDF값 저장
+	
+	private ArrayList<ArrayList<Keyword>> TF_IDF;
+	private ArrayList<Keyword> topic;
+	//TF_IDF 데이터 저장
+	
+	private int[][] int_mat;
+	public int[][] getInt_mat() {
+		return int_mat;
+	}
+	private int topicNum;
+	
+	SimilarityAlgorithm(int topicNum){
+		this.data = new HashMap<Integer,ArrayList<String>>();
+		this.topicNum = topicNum;
+		this.int_mat = new int[this.topicNum+1][this.topicNum+1];
+		
+		this.data_idf = new HashMap<Integer,ArrayList<String>>();
+		this.all_keyword = new ArrayList<String>();
+		
+		this.IDF = new HashMap<String, Double>();
+		this.TF_IDF = new ArrayList<ArrayList<Keyword>>();
+	}
+	
+	public void makeIDF(){
+		try{
+			ArrayList<String> keyword = null;
+			
+			File aFile = new File("src/IDF.txt");
+			FileReader fileReader = new FileReader(aFile);
+			BufferedReader reader = new BufferedReader(fileReader);
+			String[] topic_keyword_split;
+			String[] keyword_split;
+			String readString = null;
+			int key = 0;
+			while((readString = reader.readLine()) != null){
+				keyword = new ArrayList<String>();
+			
+				topic_keyword_split= readString.split("@");
+				keyword_split = topic_keyword_split[1].split("#");
+			
+				all_keyword.add(topic_keyword_split[0].toLowerCase());
+				for(int i = 0; i < keyword_split.length; i++){
+					keyword.add(keyword_split[i].toLowerCase());
+				}
+				data_idf.put(key, keyword);
+				key += 1;					
+			}
+			reader.close();
+			for(int i = 0; i < all_keyword.size(); i++){
+				checkNumber(i);
+			}
+			
+		}catch(Exception ex){
+			
+		}
+	}
+	private void checkNumber(int num){
+		int count = 0;
+		double df = 0;
+		for(int i = 0; i < data_idf.size(); i++){
+			for(int j = 0; j < data_idf.get(i).size(); j++){
+				if(all_keyword.get(num).equals(data_idf.get(i).get(j))){
+					count++;
+				}
+			}
+		}
+		df = count;
+		//IDF.put(all_keyword.get(num), Math.log10((double)335/df));
+		IDF.put(all_keyword.get(num), ((double)335/df));
+	}
+	public void makeTF_IDF(){
+		try{
+			Keyword keyword_temp;
+			File aFile = new File("src/TF.txt");
+			FileReader fileReader = new FileReader(aFile);
+			BufferedReader reader = new BufferedReader(fileReader);
+			String[] topic_keyword_split;
+			String[] keyword_split;
+			String[] keyword_tf;
+			String readString = null;
+			String name;
+			while((readString = reader.readLine()) != null){
+				topic = new ArrayList<Keyword>();
+				topic_keyword_split= readString.split("@");
+				keyword_split = topic_keyword_split[1].split("#");
+				for(int i = 0; i < keyword_split.length; i++){
+					keyword_tf = keyword_split[i].split("&");
+					name = keyword_tf[0].toLowerCase();
+					System.out.println(name);
+					keyword_temp = new Keyword(Integer.parseInt(keyword_tf[1]), IDF.get(name), name, topic_keyword_split[0].toLowerCase());
+					topic.add(keyword_temp);
+				}
+				TF_IDF.add(topic);
+			}
+			reader.close();
+		}catch(Exception ex){
+			
+		}
+	}
+	
+	
+	public void read_NO_duplicate_data(){
+		try{
+			File aFile = new File("src/no_duplicate_data_in.txt");
+			FileReader fileReader = new FileReader(aFile);
+			BufferedReader reader = new BufferedReader(fileReader);
+			String[] topic_keyword_split;
+			String[] keyword_split;
+			String readString = null;
+			int key = 0;
+			while((readString = reader.readLine()) != null){
+				keyword = new ArrayList<String>();
+					
+				topic_keyword_split= readString.split("@");
+				keyword_split = topic_keyword_split[1].split("#");
+			
+				keyword.add(topic_keyword_split[0].toLowerCase());
+				for(int i = 0; i < keyword_split.length; i++){
+					keyword.add(keyword_split[i].toLowerCase());
+				}
+				data.put(key, keyword);
+				key += 1;					
+			}
+			reader.close();
+		}catch(Exception ex){
+			
+		}
+	}
+	
+	
+	public void checkSimilarity_NO_duplicate(){
+		for(int i = 0; i < topicNum; i++){
+			for(int j = i; j < topicNum; j++){
+				int_mat[i+1][j+1] = (int)(1000000*calculSimilarity_NO_duplicate(data.get(i),data.get(j)));
+				int_mat[j+1][i+1] = int_mat[i+1][j+1];
+				if(i == j){
+					int_mat[i+1][j+1] = 0;
+				}
+			}
+		}
+	}
+	
+	private double calculSimilarity_NO_duplicate(ArrayList<String> topic_1, ArrayList<String> topic_2){
+		int intersection = 0;
+		int union;
+		String keyword_1 = null;
+		String keyword_2 = null;
+		for(int i = 1; i < topic_1.size(); i++){
+			for(int j = 1; j < topic_2.size(); j++){
+				keyword_1 = topic_1.get(i);
+				keyword_2 = topic_2.get(j);
+				if(keyword_1.equals(keyword_2)){
+					intersection += 1;
+				}
+			}
+		}
+		union = (topic_1.size() + topic_2.size() - intersection);
+		
+		return ((double)intersection/union);
+	}
+	
+	public void checkSimilarity_YES_duplicate(){
+		for(int i = 0; i < topicNum; i++){
+			for(int j = i; j < topicNum; j++){
+				int_mat[i+1][j+1] = (int)(1000000*calculSimilarity_YES_duplicate(TF_IDF.get(i),TF_IDF.get(j)));
+				int_mat[j+1][i+1] = int_mat[i+1][j+1];
+				if(i == j){
+					int_mat[i+1][j+1] = 0;
+				}
+			}
+		}
+	}
+	private double calculSimilarity_YES_duplicate(ArrayList<Keyword> topic_1, ArrayList<Keyword> topic_2){
+		int intersection = 0;
+		int union = 0;
+		for(int i = 0; i < topic_1.size(); i++){
+			int m = 0;
+			for(int j = 0; j < topic_2.size(); j++){
+				if(topic_1.get(i).name.equals(topic_2.get(j).name)){
+					m++;
+					if(topic_1.get(i).tf >= topic_2.get(j).tf){
+						intersection += topic_2.get(j).tf;
+						union += topic_1.get(i).tf;
+					}else{
+						intersection += topic_1.get(i).tf;
+						union += topic_2.get(j).tf;
+					}
+				}else{
+					union += topic_2.get(j).tf;
+				}
+			}
+			if(m == 0){
+				union += topic_1.get(i).tf;
+			}
+		}
+		return ((double)intersection/union);
+	}
+	public void checkSimilarity_TF_IDF(){
+		
+		for(int i = 0; i < topicNum; i++){
+			for(int j = i; j < topicNum; j++){
+				int_mat[i+1][j+1] = (int)(1000000000*calculSimilarity_TF_IDF(TF_IDF.get(i), TF_IDF.get(j)));
+				int_mat[j+1][i+1] = int_mat[i+1][j+1];
+				if(i == j){
+					int_mat[i+1][j+1] = 0;
+				}
+			}
+		}
+		System.out.println(TF_IDF.size());
+	}
+	private double calculSimilarity_TF_IDF(ArrayList<Keyword> topic_1, ArrayList<Keyword> topic_2){
+		double intersection = 0.0;
+		double union = 0.0;
+		for(int i = 0; i < topic_1.size(); i++){
+			int m = 0;
+			for(int j = 0; j < topic_2.size(); j++){
+				if(topic_1.get(i).name.equals(topic_2.get(j).name)){
+					m++;
+					if(topic_1.get(i).tf_idf >= topic_2.get(j).tf_idf){
+						intersection += topic_2.get(j).tf_idf;
+						union += topic_1.get(i).tf_idf;
+					}else{
+						intersection += topic_1.get(i).tf_idf;
+						union += topic_2.get(j).tf_idf;
+					}
+				}else{
+					union += topic_2.get(j).tf_idf;
+				}
+			}
+			if(m == 0){
+				union += topic_1.get(i).tf_idf;
+			}
+		}
+		return (intersection/union);
+	}
+	
+	
+	public void showHashElement(){
+		for(int i = 0; i < topicNum-300; i++){
+			System.out.println(TF_IDF.get(i));
+		}
+		System.out.print(TF_IDF.size());
+	}
+	
+	
+	public void showIntMatElemnet(){
+		System.out.println("Before Kruskal Algorithms ");
+		for (int i = 1; i <= topicNum; i++)
+	            System.out.print("\t" + i);
+		 System.out.println();
+		for (int source = 1; source <= topicNum; source++){
+	        System.out.print(source + "\t");
+	        for (int destination = 1; destination <= topicNum; destination++){
+	            System.out.print(int_mat[source][destination] + "\t");
+	        }
+	        System.out.println();
+	    }
+	}
+	public void writeData(String filename){
+		String name = "src/"+filename+".txt";
+		try{
+	    	////////////////////////////////////////////////////////////////
+			BufferedWriter out = new BufferedWriter(new FileWriter(name));
+	    	String s = "before Kruskal Algorithms ";
+	    	      
+	    	out.write(s);out.newLine();
+	    	for (int i = 1; i <= topicNum; i++){
+	    		s = "\t" + Integer.toString(i);
+	    		out.write(s);
+	    	}
+	    	out.newLine();
+	    	for (int source = 1; source <= topicNum; source++){
+	    		s = Integer.toString(source)+"\t";
+	    	    out.write(s);
+	    	    for (int destination = 1; destination <= topicNum; destination++){
+	    	    	s = Integer.toString(int_mat[source][destination])+"\t";
+	    	    	out.write(s);
+	    	    }
+	    	    out.newLine();
+	    	}
+	    	out.close();
+	    	   
+	    	}catch (IOException e){
+	    		System.err.println(e); 
+	    	    System.exit(1);
+	    	}
+
+	}
+}
+

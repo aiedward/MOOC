@@ -211,8 +211,13 @@ public class Tool {
 			data.provider = basic_info.attr("data-analytics-provider");
 
 			Elements metadata = body.select("div.course-info__academic").first().children();
-			// providing school				
-			data.school = metadata.get(1).text();
+			
+			if(url.contains("udacity")){
+				data.school = "no school";	
+			}else{
+				// providing school				
+				data.school = metadata.get(1).text();
+			}
 				
 			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
 			System.out.println("size of reviews at url - " + urlString + " = " + reviews.size());
@@ -230,9 +235,25 @@ public class Tool {
 				{
 					
 					data.review_data_id = reviews.get(i).getElementsByAttribute("data-review-id").attr("data-review-id");
+					data.reviewer_name = reviews.get(i).select("p.userinfo__username").get(0).text();
+					if(!data.reviewer_name.toLowerCase().equals("student")){
+						try{
+							data.other_review = reviews.get(i).select("li.userinfo-activities__item--reviews-count").get(0).getElementsByTag("b").get(0).text();
+							data.other_completed = reviews.get(i).select("li.userinfo-activities__item--courses-complited").get(0).getElementsByTag("b").get(0).text();
+						}catch(Exception e){
+							data.other_review = "anonymous";
+							data.other_completed = "anonymous";
+						}
+						
+					}else{
+						data.other_review = "anonymous";
+						data.other_completed = "anonymous";
+					}
 					data.review_date = reviews.get(i).select("div.review-body-info").select("time.review-body-info__pubdate").get(0).attr("datetime");
 					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();
-					data.review = reviews.get(i).select("div.review-body__content").get(0).text();
+					data.review = reviews.get(i).select("div.review-body__content").get(0).text().replace('&', '-');
+					data.helpful_rate = reviews.get(i).select("span.mini-poll-control__option-rating.js-helpful__rating").get(0).text();
+					
 					
 					// course_id
 					org.w3c.dom.Element course_id = newCreatedDocument
@@ -256,6 +277,22 @@ public class Tool {
 					review_id.appendChild(newCreatedDocument.createTextNode(data.review_data_id));
 					review_info.appendChild(review_id);
 					
+					// reviewer name
+					org.w3c.dom.Element reviewer = newCreatedDocument.createElement("reviewer_name");
+					reviewer.appendChild(newCreatedDocument.createTextNode(data.reviewer_name));
+					review_info.appendChild(reviewer);
+					
+					// other_review
+					org.w3c.dom.Element other_review = newCreatedDocument.createElement("other_review_count");
+					other_review.appendChild(newCreatedDocument.createTextNode(data.other_review));
+					review_info.appendChild(other_review);
+					
+					// other_completed
+ 					org.w3c.dom.Element other_completed = newCreatedDocument.createElement("other_course_completed");
+					other_completed.appendChild(newCreatedDocument.createTextNode(data.other_completed));
+					review_info.appendChild(other_completed);
+									
+					
 					// review_date
 					org.w3c.dom.Element review_date = newCreatedDocument.createElement("review_date");
 					review_date.appendChild(newCreatedDocument.createTextNode(data.review_date));
@@ -271,6 +308,11 @@ public class Tool {
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
 					review.appendChild(newCreatedDocument.createTextNode(data.review));
 					review_info.appendChild(review);
+					
+					// helpful rate
+					org.w3c.dom.Element helpful_rate = newCreatedDocument.createElement("helpful_rate");
+					helpful_rate.appendChild(newCreatedDocument.createTextNode(data.helpful_rate));
+					review_info.appendChild(helpful_rate);
 				}
 			}
 			

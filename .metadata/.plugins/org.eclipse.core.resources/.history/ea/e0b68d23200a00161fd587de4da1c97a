@@ -1,0 +1,246 @@
+package JaccardSimil;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.sun.javafx.collections.MappingChange.Map;
+
+public class Tool {
+	
+	private float[][] SimilMatrix = null;
+	private int[][] IntersectionMatrix = null;
+	ArrayList<Keyword> keywordList;
+	
+	
+	public ArrayList<String> getData() throws IOException{
+			
+		FileInputStream inputFile = new FileInputStream("./result_v33.txt");
+		
+		
+		
+		// Construct BufferReader from inputStreamReader
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
+
+		
+		// Keywords included in the Layer, the type of the keywords is currently 'Activity'
+		String[] matchingTarget = fileReader.readLine().split(",");
+		keywordList = new ArrayList<Keyword>();
+		
+		
+		// adding topics to topic list
+		System.out.println("Current target type is 'activity'  ");
+		for(String keyword : matchingTarget){
+			keywordList.add(new Keyword(keyword));
+					
+		}
+		// delete null index
+		keywordList.remove(0);
+		
+		this.IntersectionMatrix = new int[keywordList.size()][keywordList.size()];
+		this.SimilMatrix = new float[keywordList.size()][keywordList.size()];
+	
+		final ArrayList<String> postingList = new ArrayList<String>();
+		
+		String line = null;
+		String[] lineArr;
+		
+		// temporary arraylist to store intersection index
+		ArrayList<String> tempKeywords = new ArrayList<String>();
+		
+		int count =0;
+		// read posts line by line 
+		while ( (line = fileReader.readLine()) != null){
+			
+			count++;
+						
+			tempKeywords.clear();
+			
+			line.replace("  ", " ");
+			line.replace("   ", " ");
+					
+			lineArr = line.split(" ");
+			for( String token : lineArr){
+
+				for(int i=0; i<keywordList.size(); i++){
+					if( keywordList.get(i).compare(token)){
+						tempKeywords.add(keywordList.get(i).name);
+										
+					}
+					
+				}
+			}
+			
+			
+			// 한 포스팅 내에 스타벅스라는 단어가 두번 들어갔을 경우때문에 현재 전체 frequency보다 [i][i] 에 해당하는 value가 더 높음. 어짜피 [i][i]의 유사도는 항상 1이므로 나중에 1로 처리.
+			
+			if(tempKeywords.size() > 0){
+				System.out.println("size of co-occurrence list " + tempKeywords.size());
+				// add co-occurrence count(intersection) to Similarity Matrix
+				for(int i=0; i<tempKeywords.size(); i++){
+					for( int j=i; j<tempKeywords.size(); j++){
+						this.IntersectionMatrix[getIndexByname(tempKeywords.get(i))][getIndexByname(tempKeywords.get(j))]++;
+								
+						System.out.println("line index " + count + "- adding intersection count to - "
+								+ tempKeywords.get(i) + " , " + tempKeywords.get(j)
+								+ " currently count of SimilMatrix["+getIndexByname(tempKeywords.get(i))
+								+"]["+getIndexByname(tempKeywords.get(j))+"] = " 
+								+  this.IntersectionMatrix[getIndexByname(tempKeywords.get(i))][getIndexByname(tempKeywords.get(j))]);
+						
+					}										
+					
+				}
+			}
+		
+		}
+		
+		
+		
+		fileReader.close();
+		
+		// make matrix symmetric
+		for(int i=0; i<keywordList.size(); i++){
+			for( int j=i; j<keywordList.size(); j++){
+				if(i==j){
+					continue;
+					
+				}else{
+					this.IntersectionMatrix[j][i] = this.IntersectionMatrix[i][j]; 
+				}				
+			}										
+			
+		}
+		
+		
+		
+		for(int i=0; i<keywordList.size(); i++){
+			System.out.println(keywordList.get(i).name + "'s frequency = " + keywordList.get(i).tf);
+		}
+		
+		// Writing intersection_count text data.
+		writeIntersectionData("intersection_count");
+		
+		// Calculating and Writing Jaccard Similarity text data.
+		calculateSimilarity();
+		writeSimilarityData("Jaccard_Similarity");
+					
+		return postingList; 
+		
+	}
+	
+	private void calculateSimilarity() {
+		// TODO Auto-generated method stub
+		int intersection, union;
+		for(int i=0; i<keywordList.size(); i++){
+			for(int j=0; j<keywordList.size(); j++){
+				 
+				if(i==j){
+					this.SimilMatrix[i][j] = 1;
+					
+				}else{
+					// 교집합
+					intersection = this.IntersectionMatrix[i][j];
+					
+					// 합집합
+					union = keywordList.get(i).tf + keywordList.get(j).tf - intersection;
+					
+					if(union ==0){
+						this.SimilMatrix[i][j] = 0;
+					}else{
+						this.SimilMatrix[i][j] = (float)intersection/ union;
+					}
+				
+				}
+			
+			}
+		}
+	}
+
+	public int getIndexByname(String name){
+		for(int i=0; i<keywordList.size();i++){
+			if(keywordList.get(i).name.equals(name.toLowerCase())){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	
+	public void writeIntersectionData(String filename){
+		String name = "./"+filename+".txt";
+		try{
+	    	////////////////////////////////////////////////////////////////
+			BufferedWriter out = new BufferedWriter(new FileWriter(name));
+	    	String s = "before calculating Jaccard similarity";
+	    	      
+	    	out.write(s);out.newLine();
+	    	
+	    	for(int i=0; i< keywordList.size(); i++){
+	    		s = "\t" + keywordList.get(i).name;
+	    		out.write(s);
+	    	}
+	    	out.newLine();
+	    	
+	    	for(int i=0; i< keywordList.size(); i++){
+	    		s = keywordList.get(i).name + "\t";
+	    		out.write(s);
+	    		for(int j =0; j<keywordList.size(); j++){
+	    			s = Integer.toString(this.IntersectionMatrix[i][j]) + "\t";
+	    			out.write(s);
+	    		}
+	    		out.newLine();
+	    		
+	    	}
+	    	out.close();
+	    	   	
+	    	   
+	    	}catch (IOException e){
+	    		System.err.println(e); 
+	    	    System.exit(1);
+	    	}
+
+	}
+	
+	public void writeSimilarityData(String filename){
+		String name = "./"+filename+".txt";
+		try{
+	    	////////////////////////////////////////////////////////////////
+			BufferedWriter out = new BufferedWriter(new FileWriter(name));
+	    	String s = "after calculating Jaccard similarity";
+	    	      
+	    	out.write(s);out.newLine();
+	    	
+	    	for(int i=0; i< keywordList.size(); i++){
+	    		s = "\t" + keywordList.get(i).name;
+	    		out.write(s);
+	    	}
+	    	out.newLine();
+	    	
+	    	for(int i=0; i< keywordList.size(); i++){
+	    		s = keywordList.get(i).name + "\t";
+	    		out.write(s);
+	    		for(int j =0; j<keywordList.size(); j++){
+	    			s = Float.toString(this.SimilMatrix[i][j]) + "\t";
+	    			out.write(s);
+	    		}
+	    		out.newLine();
+	    		
+	    	}
+	    	out.close();
+	    	   	
+	    	   
+	    	}catch (IOException e){
+	    		System.err.println(e); 
+	    	    System.exit(1);
+	    	}
+
+	}
+	
+	
+}
