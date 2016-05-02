@@ -218,7 +218,6 @@ public class Tool {
 				courses.appendChild(course);
 				
 			}
-			instructor_info.appendChild(courses);
 			
 			// resume
 			org.w3c.dom.Element resume = newCreatedDocument.createElement("resume");

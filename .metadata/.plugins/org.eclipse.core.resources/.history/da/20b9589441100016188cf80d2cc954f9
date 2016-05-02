@@ -348,19 +348,16 @@ public class Tool {
 			course_school.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.school));
 			course_info.appendChild(course_school);
 			
-			// language
-			org.w3c.dom.Element course_language = newCreatedDocument.createElement("language");
-			course_language.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.language));
-			course_info.appendChild(course_language);
 			
-						
 			// description
 			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
 			course_description.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.description));
+			
 			course_info.appendChild(course_description);
 			
 			// learn about
 			org.w3c.dom.Element learn_about = newCreatedDocument.createElement("learn_about");
+					
 			learn_about.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.learnAbout));
 			course_info.appendChild(learn_about);
 			
