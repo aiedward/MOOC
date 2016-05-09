@@ -1,0 +1,16 @@
+import java.util.ArrayList;
+import java.util.Date;
+
+
+public class Data {
+	
+	public String name;
+	
+	public String url;
+	
+	public ArrayList<String> course_list;
+	public ArrayList<String> course_url;
+	
+	public String provider;
+		
+}

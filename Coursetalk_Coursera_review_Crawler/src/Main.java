@@ -11,7 +11,8 @@ import javax.xml.transform.stream.StreamResult;
 
 public class Main {
 	public final static String targetSITE = "https://www.coursetalk.com";
-	public final static String targetProvider = "/providers/coursera/courses";
+	//public final static String targetProvider = "/providers/coursera/courses";
+	public final static String targetProvider = "/providers/udacity/courses";
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();
 

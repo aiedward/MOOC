@@ -26,6 +26,8 @@ public class Data {
 	
 	public String reviewer_name;
 	
+	public String reviewer_url;
+	
 	public String other_review;
 	
 	public String other_completed;

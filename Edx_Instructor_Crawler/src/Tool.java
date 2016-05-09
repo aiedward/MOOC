@@ -208,6 +208,7 @@ public class Tool {
 				org.w3c.dom.Element course = newCreatedDocument
 						.createElement("course");
 				
+				// 현재 courseCode + title 형태의 string으로 저장되어있음.
 				course.appendChild(createTextNodeWithoutNull
 						(newCreatedDocument, element.findElement(By.className("course-code")).getText() ));
 				course.appendChild(createTextNodeWithoutNull
