@@ -51,11 +51,15 @@ public class Tool {
 			e.printStackTrace();
 		}
 		
-		Elements nav = mainDom.getElementsByTag("main").first().child(0)
-				.getElementsByClass("course-listing__leftpanel").first().child(3).select("li");
-				
-		final int pageSize = Integer.valueOf(nav.get(nav.size()-2).text());
+			
+		Element nav = mainDom.getElementsByClass("js-course-pagination").get(0).getElementsByClass("pagination").get(0).getElementsByTag("input").get(0);
+		
+		System.out.println(nav);
+		
+
+		final int pageSize = Integer.valueOf(nav.attr("value"));
 		System.out.println(pageSize);
+		
 		
 											
 		while (true) {

@@ -83,7 +83,7 @@ public class Main {
 			SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 			
 			//StreamResult xmlFile = new StreamResult(new File("CousesTalkData_coursera"+format.format(now)+".xml"));
-			StreamResult xmlFile = new StreamResult(new File("CousesTalkData_coursera"+format.format(now)+".xml"));
+			StreamResult xmlFile = new StreamResult(new File("CousesTalkData_udacity"+format.format(now)+".xml"));
 			
 			try {
 				TransformerFactory.newInstance().newTransformer()
