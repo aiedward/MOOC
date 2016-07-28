@@ -87,11 +87,12 @@ public class Tool {
 					}
 
 					Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-							.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
+							.getElementsByClass("course-listing__leftpanel").first().child(3).select("div.course-listing-card");
 					if( mpage <= pageSize){
 						
 						for(int i=0; i<hrefs.size(); i++){
 							courseData.url = hrefs.get(i).select("a[data-analytics-course]").attr("href").toString();
+							System.out.println(courseData.url);
 							urlList.add(courseData.url);
 												
 						}
@@ -179,6 +180,7 @@ public class Tool {
 			document = connection.get();
 		} catch (Exception e) {
 			e.printStackTrace();
+			return;
 		}
 						
 		Element review = document.getElementById("reviews");
@@ -286,10 +288,13 @@ public class Tool {
 						data.other_completed = "anonymous";
 					}
 					data.review_date = reviews.get(i).select("div.review-body-info").select("time.review-body-info__pubdate").get(0).attr("datetime");
-					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();
+					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();	// 0번째 child == 'ratingValue'
+					
 					data.review = reviews.get(i).select("div.review-body__content").get(0).text().replace('&', '-');
 					
 					data.helpful_rate = reviews.get(i).select("span.mini-poll-control__option-rating.js-helpful__rating").get(0).text();
+					data.status = reviews.get(i).select("div.review-body-info").select("span.review-body-info__course-stage--completed").text();
+//					System.out.println(data.status);
 					
 					
 					// course_id
@@ -345,6 +350,15 @@ public class Tool {
 					review_value.appendChild(newCreatedDocument.createTextNode(data.review_value));
 					review_info.appendChild(review_value);
 					
+					org.w3c.dom.Element review_status = newCreatedDocument.createElement("review_status");
+					if(data.status.isEmpty()){
+						review_status.appendChild(newCreatedDocument.createTextNode("null"));
+					}else{
+						review_status.appendChild(newCreatedDocument.createTextNode(data.status));
+					}
+							
+					review_info.appendChild(review_status);
+					
 					// review contents
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
 					if(data.review.isEmpty()){
@@ -352,7 +366,7 @@ public class Tool {
 					}else{
 						review.appendChild(newCreatedDocument.createTextNode(data.review));
 					}
-					review.appendChild(newCreatedDocument.createTextNode(data.review));
+//					review.appendChild(newCreatedDocument.createTextNode(data.review));
 					review_info.appendChild(review);
 					
 					

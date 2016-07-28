@@ -51,5 +51,6 @@ public class Data {
 	public String school;
 	
 	public String ratingValue;
+	public String status;
 		
 }

@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +36,11 @@ public class Tool {
 	
 	public ArrayList<String> getVideoURL() throws IOException{
 		
-		driver.navigate().to("https://www.edx.org/course");
+		driver.navigate().to("http://edx.org/courses");
 		
 		final ArrayList<String> urlList = new ArrayList<String>();
+
+		
 		boolean plag = false;
 		int position = 1000;
 //		int count = 0;
@@ -85,24 +90,24 @@ public class Tool {
 			
 			
 		
-		/*
-		FileInputStream inputFile = new FileInputStream("./courses_url_edX.txt");
-		
-		// Construct BufferReader from inputStreamReader
-		BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputFile));
-		
-		
-		
-		String line = null;
-		
-		// read url line by line 
-		while ( (line = fileReader.readLine()) != null){
-			urlList.add(line);
-		}
-		
-		fileReader.close();
-		*/
-		
+//		
+//		FileOutputStream outputFile = new FileOutputStream("./courses_url_edX.txt");
+//		// Construct BufferReader from inputStreamReader
+//		BufferedWriter fileWriter = new BufferedReader(new InputStreamReader(inputFile));
+//		
+//		
+//		
+//		String line = null;
+//		
+//		// read url line by line 
+//		while ( (line = fileWriter.readLine()) != null){
+//			urlList.add(line);
+//		}
+//		
+//		fileReader.close();
+//		
+//		
+
 		
 		urlSize = urlList.size();
 		System.out.println("size of url - " + urlSize);
@@ -177,6 +182,15 @@ public class Tool {
 		
 		data.id = driver.findElement(By.id("course-info-page")).getAttribute("data-course-id").toString();
 		System.out.println(data.id);
+		
+		if(driver.findElements(By.cssSelector("div.course-start")).size() > 0 ){
+			data.status = driver.findElement(By.cssSelector("div.course-start")).findElement(By.tagName("span")).getText().toString();
+		}else{
+			data.status = "enrollment_closed";
+		}
+		
+		
+//		System.out.println(data.status);
 
 	
 		ArrayList <WebElement> metadata = new ArrayList <WebElement> (driver
@@ -226,7 +240,15 @@ public class Tool {
 				continue;
 			}
 			
-			if(Summary.get(i).getAttribute("data-field").equals("school")){
+			if(Summary.get(i).getAttribute("data-field").equals("length")){
+				data.length = Summary.get(i).getText();
+				System.out.println("length - " + data.length);
+				
+			}else if(Summary.get(i).getAttribute("data-field").equals("effort")){
+				data.effort = Summary.get(i).getText();
+				System.out.println("length - " + data.effort);
+			}		
+			else if(Summary.get(i).getAttribute("data-field").equals("school")){
 				data.school = Summary.get(i).getText();
 				System.out.println("school - " + data.school);
 			}else if(Summary.get(i).getAttribute("data-field").equals("subject")){
@@ -327,6 +349,16 @@ public class Tool {
 			org.w3c.dom.Element course_intro = newCreatedDocument.createElement("course_intro");
 			course_intro.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.intro));
 			course_info.appendChild(course_intro);
+			
+			// length
+			org.w3c.dom.Element course_length = newCreatedDocument.createElement("length");
+			course_length.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.length));
+			course_info.appendChild(course_length);
+			
+			// effort
+			org.w3c.dom.Element course_effort = newCreatedDocument.createElement("effort");
+			course_effort.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.effort));
+			course_info.appendChild(course_effort);
 
 			// subject
 			org.w3c.dom.Element course_subject = newCreatedDocument.createElement("subject");
@@ -368,6 +400,12 @@ public class Tool {
 			org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
 			course_url.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.url));
 			course_info.appendChild(course_url);
+			
+			// status
+			org.w3c.dom.Element status = newCreatedDocument.createElement("status");
+			status.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.status));
+			course_info.appendChild(status);
+
 			
 								
 		}

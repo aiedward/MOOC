@@ -11,16 +11,22 @@ import javax.xml.transform.stream.StreamResult;
 
 public class Main {
 	public final static String targetSITE = "https://www.coursetalk.com";
-	//public final static String targetProvider = "/providers/coursera/courses";
-	public final static String targetProvider = "/providers/udacity/courses";
+	public final static String targetProvider = "/providers/coursera/courses";
+//	public final static String targetProvider = "/providers/udacity/courses";
+//	public final static String targetProvider = "/providers/edx/courses";
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();
+	public final static String[] targetProviders = {"/providers/udacity/courses", "/providers/edx/courses", "/providers/coursera/courses" };
 
 	public static void main(String[] args) {
 		
 		Tool tool=new Tool();
+		
+		for(int i=0; i<targetProviders.length; i++){
+			URLLIST.addAll(tool.getAllVideoURL(targetSITE.concat(targetProviders[i])));
+		}
 
-		URLLIST=tool.getAllVideoURL(targetSITE.concat(targetProvider));
+//		URLLIST=tool.getAllVideoURL(targetSITE.concat(targetProvider));
 		
 		System.out.println("Finish getting all courses url, Let's crawl video data and reviews data");
 		
@@ -78,8 +84,9 @@ public class Main {
 			
 			SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 			
-			//StreamResult xmlFile = new StreamResult(new File("CousesTalk_ReviewData_coursera"+format.format(now)+".xml"));
-			StreamResult xmlFile = new StreamResult(new File("CousesTalk_ReviewData_udacity"+format.format(now)+".xml"));
+//			StreamResult xmlFile = new StreamResult(new File("CousesTalk_ReviewData_coursera"+format.format(now)+".xml"));
+//			StreamResult xmlFile = new StreamResult(new File("CousesTalk_ReviewData_udacity"+format.format(now)+".xml"));
+			StreamResult xmlFile = new StreamResult(new File("CousesTalk_ReviewData_integrated"+format.format(now)+".xml"));
 			
 			try {
 				TransformerFactory.newInstance().newTransformer()

@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="https://www.edx.org/bio/tarun-khanna" key="selection"/>
+		<item value="Data Analysis: Building Your Own Business Dashboard" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="https://www.edx.org/bio/tarun-khanna"/>
-			<item value="https://www.edx.org/bio/jooyeon-kim"/>
-			<item value="https://www.edx.org/bio/julian-samal"/>
-			<item value="https://www.edx.org/bio/bram-nauta"/>
-			<item value="https://www.edx.org/bio/leland-chang"/>
-			<item value="https://www.edx.org/bio/joleen-timko"/>
-			<item value="https://www.edx.org/bio/eugene-fitzgerald"/>
-			<item value="https://www.edx.org/bio/lorena-tudela-marco"/>
+			<item value="Data Analysis: Building Your Own Business Dashboard"/>
+			<item value="session count - "/>
+			<item value="https://www.class-central.com/u/100218"/>
+			<item value="https://www.class-central.com/u/112411"/>
+			<item value="https://www.class-central.com/u/89062"/>
+			<item value="https://www.class-central.com/u/58518"/>
+			<item value="https://www.class-central.com/u/78898"/>
+			<item value="https://www.class-central.com/u/57489"/>
 		</list>
 		<list key="replacehistory">
 			<item value="keywordList"/>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;opencsv-3.1.jar&apos; to &apos;TimeSlice_MOOC&apos;&#x0D;&#x0A;- Original project: &apos;Temporary_Coding&apos;&#x0D;&#x0A;- Destination element: &apos;TimeSlice_MOOC&apos;&#x0D;&#x0A;- Original element: &apos;opencsv-3.1.jar&apos;" description="Copy file" destination="=TimeSlice_MOOC" element1="opencsv-3.1.jar" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1468306556370" units="0" version="1.0"/>
+</session>

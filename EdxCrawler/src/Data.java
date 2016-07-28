@@ -36,5 +36,11 @@ public class Data {
 
 	public String level;
 	public String language;
+
+	public String status;
+
+	public String length;
+	
+	public String effort;
 	
 }

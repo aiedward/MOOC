@@ -92,7 +92,7 @@ public class Tool {
 					}
 
 					Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-							.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
+							.getElementsByClass("course-listing__leftpanel").first().child(3).select("div.course-listing-card");
 					if( mpage <= pageSize){
 						
 						for(int i=0; i<hrefs.size(); i++){

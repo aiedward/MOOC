@@ -78,11 +78,11 @@ public class Tool {
 			}
 
 			Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-					.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
+					.getElementsByClass("course-listing__leftpanel").first().child(3).select("div.course-listing-card");
 			
 			
 			for(int j=0; j<hrefs.size(); j++){
-					courseData.url = hrefs.get(j).select("a[data-analytics-course").attr("href").toString();
+					courseData.url = hrefs.get(j).select("a[data-analytics-course]").attr("href").toString();
 					urlList.add(courseData.url);
 										
 			}
@@ -137,6 +137,12 @@ public class Tool {
 	public void crawlData(final String url, final Integer index){
 		
 		Connection connection;
+		
+		// cannot connect to the url, then return.
+		if(url.equals("https://www.coursetalk.com/providers/edx/courses/molecular-biology-part-2-transcription-and-transposition-2")){
+			return;
+		}
+		
 		final int page_size;
 		
 		Integer mpage=new Integer(1);
@@ -225,8 +231,15 @@ public class Tool {
 				// providing school				
 				data.school = metadata.get(1).text();
 			}
-				
+			
+			
+			
 			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
+			
+			// if the size of review list is smaller than 1, return.
+			if(reviews.size() < 1){
+				return;
+			}
 			System.out.println("size of reviews at url - " + urlString + " = " + reviews.size());
 			
 					
@@ -268,6 +281,8 @@ public class Tool {
 					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();
 					data.review = reviews.get(i).select("div.review-body__content").get(0).text().replace('&', '-');
 					data.helpful_rate = reviews.get(i).select("span.mini-poll-control__option-rating.js-helpful__rating").get(0).text();
+					
+					data.status = reviews.get(i).select("div.review-body-info").select("span.review-body-info__course-stage--completed").text();
 					
 					
 					// course_id
@@ -328,6 +343,15 @@ public class Tool {
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
 					review.appendChild(newCreatedDocument.createTextNode(data.review));
 					review_info.appendChild(review);
+					
+					org.w3c.dom.Element review_status = newCreatedDocument.createElement("review_status");
+					if(data.status.isEmpty()){
+						review_status.appendChild(newCreatedDocument.createTextNode("null"));
+					}else{
+						review_status.appendChild(newCreatedDocument.createTextNode(data.status));
+					}
+							
+					review_info.appendChild(review_status);
 					
 					
 					

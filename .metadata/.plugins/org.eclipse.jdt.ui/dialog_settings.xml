@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
-	<item value="C:\Users\admin\workspace\EdxCrawler\library" key="org.eclipse.jdt.ui.lastextjar"/>
-	<item value="C:\Users\admin\Desktop\Park\social computing lab project\JaccardSimil" key="org.eclipse.jdt.ui.last.external.project"/>
+	<item value="C:\Users\admin\workspace\TimeSlice_MOOC" key="org.eclipse.jdt.ui.lastextjar"/>
+	<item value="C:\Users\admin\Desktop\Park\Temporary_Coding" key="org.eclipse.jdt.ui.last.external.project"/>
 	<section name="RefactoringWizard.preview">
 		<item value="600" key="width"/>
 		<item value="400" key="height"/>
 	</section>
 	<section name="org.eclipse.ltk.ui.refactoring.settings">
+		<item value="false" key="renameSubpackages"/>
 		<item value="false" key="updateQualifiedNames"/>
 		<item value="*" key="patterns"/>
 		<item value="false" key="updateSimilarElements"/>

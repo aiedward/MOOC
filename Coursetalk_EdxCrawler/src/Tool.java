@@ -40,7 +40,7 @@ public class Tool {
 		// jSoup Connection instance 
 		Connection mainConn;
 		Document mainDom = null;
-		mainConn = Jsoup.connect(urlString).timeout(0);
+		mainConn = Jsoup.connect(urlString).timeout(1000*5);
 
 		try {
 			mainDom = mainConn.get();
@@ -75,7 +75,7 @@ public class Tool {
 					// jSoup Connection instance 
 					Connection mainConn;
 					Document mainDom = null;
-					mainConn = Jsoup.connect(urlString).timeout(0);
+					mainConn = Jsoup.connect(urlString).timeout(1000*5);
 
 					try {
 						mainDom = mainConn.get();
@@ -85,7 +85,7 @@ public class Tool {
 					}
 
 					Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-							.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
+							.getElementsByClass("course-listing__leftpanel").first().child(3).select("div.course-listing-card");
 					if( mpage <= pageSize){
 						
 						for(int i=0; i<hrefs.size(); i++){
@@ -93,9 +93,6 @@ public class Tool {
 							
 							// can assign title, provider, course-id, reviewValue, and 
 
-							
-							
-							
 //							courseData.title = hrefs.get(i).select("a[data-analytics-course").text().toString();
 //							courseData.provider = hrefs.get(i).select("a[data-analytics-course").attr("data-analytics-provider").toString();
 //							courseData.id = hrefs.get(i).select("a[data-analytics-course").attr("data-analytics-course-id").toString();
@@ -103,7 +100,7 @@ public class Tool {
 //							courseData.reviewCount = hrefs.get(i).select("li.course-listing-summary__ratings__number").text().toString().split(" ")[0];
 //							
 							courseData.url = hrefs.get(i).select("a[data-analytics-course").attr("href").toString();
-							
+							System.out.println(courseData.url);
 							urlList.add(courseData.url);
 												
 						}
@@ -181,7 +178,7 @@ public class Tool {
 			public void run() {
 				// TODO Auto-generated method stub
 				Connection connection;
-				connection = Jsoup.connect(url).timeout(0);
+				connection = Jsoup.connect(url).timeout(10*1000);
 				
 				// newCreatedDocument is destination of XML.
 				NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
