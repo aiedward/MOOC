@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename Java project &apos;Copy of socialComputing_Ontology&apos; to &apos;Json_coding&apos;&#x0D;&#x0A;- Original element: &apos;Copy of socialComputing_Ontology&apos;&#x0D;&#x0A;- Renamed element: &apos;Copy of socialComputing_Ontology&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename Java project &apos;Copy of socialComputing_Ontology&apos;" flags="7" id="org.eclipse.jdt.ui.rename.java.project" input="=Copy of socialComputing_Ontology" name="Json_coding" references="true" stamp="1465459273129" version="1.0"/>
+</session>

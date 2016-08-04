@@ -51,11 +51,14 @@ public class Tool {
 			e.printStackTrace();
 		}
 		
-		Elements nav = mainDom.getElementsByTag("main").first().child(0)
-				.getElementsByClass("course-listing__leftpanel").first().child(3).select("li");
-				
-		final int pageSize = Integer.valueOf(nav.get(nav.size()-2).text());
-		System.out.println("PageSize - " + pageSize);
+		Element nav = mainDom.getElementsByClass("js-course-pagination").get(0).getElementsByClass("pagination")
+				.get(0).getElementsByTag("input").get(0);
+		
+		System.out.println(nav);
+		
+		
+		final int pageSize = Integer.valueOf(nav.attr("value"));
+		System.out.println(pageSize);
 		
 		for(int i =0; i<pageSize; i++){
 			
@@ -75,11 +78,11 @@ public class Tool {
 			}
 
 			Elements hrefs = mainDom.getElementsByTag("main").first().child(0)
-					.getElementsByClass("course-listing__leftpanel").first().child(2).select("div.course-listing");
+					.getElementsByClass("course-listing__leftpanel").first().child(3).select("div.course-listing-card");
 			
 			
 			for(int j=0; j<hrefs.size(); j++){
-					courseData.url = hrefs.get(j).select("a[data-analytics-course").attr("href").toString();
+					courseData.url = hrefs.get(j).select("a[data-analytics-course]").attr("href").toString();
 					urlList.add(courseData.url);
 										
 			}
@@ -134,6 +137,12 @@ public class Tool {
 	public void crawlData(final String url, final Integer index){
 		
 		Connection connection;
+		
+		// cannot connect to the url, then return.
+		if(url.equals("https://www.coursetalk.com/providers/edx/courses/molecular-biology-part-2-transcription-and-transposition-2")){
+			return;
+		}
+		
 		final int page_size;
 		
 		Integer mpage=new Integer(1);
@@ -151,6 +160,10 @@ public class Tool {
 		}
 						
 		Element review = document.getElementById("reviews");
+		if(review == null){
+			return;
+		}
+		
 		
 		Elements review_nav = review.select("nav").select("li");
 				
@@ -218,8 +231,15 @@ public class Tool {
 				// providing school				
 				data.school = metadata.get(1).text();
 			}
-				
+			
+			
+			
 			Elements reviews = document.getElementById("reviews").select("div.reviews-list__item");
+			
+			// if the size of review list is smaller than 1, return.
+			if(reviews.size() < 1){
+				return;
+			}
 			System.out.println("size of reviews at url - " + urlString + " = " + reviews.size());
 			
 					
@@ -236,6 +256,14 @@ public class Tool {
 					
 					data.review_data_id = reviews.get(i).getElementsByAttribute("data-review-id").attr("data-review-id");
 					data.reviewer_name = reviews.get(i).select("p.userinfo__username").get(0).text();
+					
+					if(reviews.get(i).select("a.link-unstyled").size()>0){
+						data.reviewer_url = reviews.get(i).select("a.link-unstyled").get(0).attr("href");
+						System.out.println(data.reviewer_url);
+					}else{
+						data.reviewer_url = "null";
+					}
+					
 					if(!data.reviewer_name.toLowerCase().equals("student")){
 						try{
 							data.other_review = reviews.get(i).select("li.userinfo-activities__item--reviews-count").get(0).getElementsByTag("b").get(0).text();
@@ -253,6 +281,8 @@ public class Tool {
 					data.review_value = reviews.get(i).select("meta[itemprop]").get(0).attr("content").toString();
 					data.review = reviews.get(i).select("div.review-body__content").get(0).text().replace('&', '-');
 					data.helpful_rate = reviews.get(i).select("span.mini-poll-control__option-rating.js-helpful__rating").get(0).text();
+					
+					data.status = reviews.get(i).select("div.review-body-info").select("span.review-body-info__course-stage--completed").text();
 					
 					
 					// course_id
@@ -291,7 +321,12 @@ public class Tool {
  					org.w3c.dom.Element other_completed = newCreatedDocument.createElement("other_course_completed");
 					other_completed.appendChild(newCreatedDocument.createTextNode(data.other_completed));
 					review_info.appendChild(other_completed);
-									
+					
+					// reviewer url
+					org.w3c.dom.Element reviewer_url = newCreatedDocument.createElement("reviewer_url");
+					reviewer_url.appendChild(newCreatedDocument.createTextNode(data.reviewer_url));
+					review_info.appendChild(reviewer_url);
+													
 					
 					// review_date
 					org.w3c.dom.Element review_date = newCreatedDocument.createElement("review_date");
@@ -308,6 +343,17 @@ public class Tool {
 					org.w3c.dom.Element review = newCreatedDocument.createElement("review");
 					review.appendChild(newCreatedDocument.createTextNode(data.review));
 					review_info.appendChild(review);
+					
+					org.w3c.dom.Element review_status = newCreatedDocument.createElement("review_status");
+					if(data.status.isEmpty()){
+						review_status.appendChild(newCreatedDocument.createTextNode("null"));
+					}else{
+						review_status.appendChild(newCreatedDocument.createTextNode(data.status));
+					}
+							
+					review_info.appendChild(review_status);
+					
+					
 					
 					// helpful rate
 					org.w3c.dom.Element helpful_rate = newCreatedDocument.createElement("helpful_rate");

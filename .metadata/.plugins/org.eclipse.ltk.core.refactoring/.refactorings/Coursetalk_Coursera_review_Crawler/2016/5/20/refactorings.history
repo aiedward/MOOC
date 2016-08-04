@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Coursetalk_Coursera_review_Crawler/CousesTalk_ReviewData_udacity20160509.xml&apos; to &apos;CousesTalk_ReviewData_coursera20160509.xml&apos;" description="Rename resource &apos;CousesTalk_ReviewData_udacity20160509.xml&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="CousesTalk_ReviewData_udacity20160509.xml" name="CousesTalk_ReviewData_coursera20160509.xml" stamp="1462795062621" updateReferences="true"/>
+</session>

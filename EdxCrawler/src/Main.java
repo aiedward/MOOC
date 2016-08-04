@@ -12,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 
 public class Main {
 	public final static String targetSITE = "https://www.edx.org";
+//	public final static String targetSITE = "http://datalab.naver.com/ca/step1.naver?";
 	public final static String targetProvider = "/providers/edx/courses";
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy source folder &apos;opencsv-3.1.jar&apos; to &apos;Temporary_Coding&apos;&#x0D;&#x0A;- Original project: &apos;NetSet&apos;&#x0D;&#x0A;- Destination element: &apos;Temporary_Coding&apos;&#x0D;&#x0A;- Original element: &apos;NetSet/libs/opencsv-3.1.jar&apos;" description="Copy source folder" destination="=Temporary_Coding" element1="/libs\/opencsv-3.1.jar" flags="6" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyRoots" roots="1" stamp="1463724559149" version="1.0"/>
+</session>
