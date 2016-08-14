@@ -14,6 +14,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -31,8 +32,25 @@ public class Tool {
 	ArrayList<String> instructorList = new ArrayList<String>();
 	
 	Data courseData = new Data();
-	final WebDriver driver = new FirefoxDriver();
+//	final WebDriver driver = new FirefoxDriver();
+//	int urlSize = 0;
+
+	WebDriver driver;
 	int urlSize = 0;
+	
+	
+	public void initDriver(){
+		
+		System.setProperty(
+				"webdriver.chrome.driver",
+				"D:/chromedriver_win32/chromedriver.exe"
+		);
+		
+		driver = new ChromeDriver();
+		driver.get("http://www.google.com");
+		
+		
+	}
 	
 	public ArrayList<String> getVideoURL(String targetURL) throws IOException{
 		

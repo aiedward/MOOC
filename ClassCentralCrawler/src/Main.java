@@ -40,6 +40,8 @@ public class Main {
 		
 		Tool tool=new Tool();
 		
+		tool.initDriver();
+		
 		for(int i=0; i<targetUrlList.length; i++){
 			try{
 				URLLIST.addAll(tool.getVideoURL(targetUrlList[i]));

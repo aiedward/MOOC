@@ -14,6 +14,7 @@ public class Course {
 	String language;	// language
 	
 	// Time Varying(network; human, keywords) 
+	ArrayList<String> keywordsList;
 	
 	// Control(Fixed Effect: course, time // Number of sessions for the course <0,,... n> )
 	Date startingPoint;	// 1st element of the session list
@@ -25,9 +26,6 @@ public class Course {
 	ArrayList<Date> sessionList;
 	int session_size;
 	int session_length;	// session Length
-	
-	
-
 	
 	
 	int totalReview_count;

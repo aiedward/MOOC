@@ -8,18 +8,22 @@ public class Main {
 		Tool tool = new Tool();
 		tool.getCourseData();
 		tool.getReviewData();
+		tool.getKeywordData();
 		
-		tool.adjustDataForTimeSeries(); 	// this function is to adjust data for Cross-sectional Time series (Fixed Effects model);
+		tool.adjustDataForTimeSeries(); // this function is to adjust data for Cross-sectional Time series (Fixed Effects model);
 		tool.makeXTdata();
-//		tool.writeXTdataToJson();	// this function is to adjust data for Cross-sectional Time series (Fixed Effects model);
+		tool.calculateCourseReviewCountandValue();
 		
+//		tool.printCourseListWithTime();
+//		tool.writeXTdataToJson();
+//		tool.writeReviewToJson();
+//		tool.printTimeSeries();
 		
-		
-//		tool.calculateInterval();
-//		tool.writeResults();
-		
-		
+//		tool.writeXTdataToCsv();
+//		tool.writeXTReviewToCsv();
+		tool.filterTimeForWritingConnection();
 
-		
+	
+				
 	}
 }
