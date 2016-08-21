@@ -205,7 +205,7 @@ public class Tool {
 	
 	public void getKeywordData() throws IOException{
 		
-		final String inputFile = "keywords_MOOCs";
+		final String inputFile = "keywords_MOOCs_k5";
 		
 		try{
 			mReader = new CSVReader(new FileReader(inputFile + ".csv"));
@@ -363,8 +363,8 @@ public class Tool {
 		for(Course course : courseList)
 			course.TimeData = new ArrayList<CourseTime>();
 		
-		// Set interval as <<<< 1 week >>>>(ex: T1 to T2)
-		int Timeinterval = 28;
+		// Set interval as <<<< 6 weeks >>>>(ex: T1 to T2)
+		int Timeinterval = 42;
 		
 		Date nextTime = new Date();
 		Calendar c = Calendar.getInstance();
@@ -482,7 +482,7 @@ public class Tool {
 	///////// Write social edge file function ///////
 	public void writeConnectionData(int timeIndex) throws IOException{
 		
-		String result = "./results_network/networkData_T-" + timeIndex;
+		String result = "./results_network_6weeks/networkData_T" + timeIndex;
 		CSVWriter writer = new CSVWriter(new FileWriter(result + ".csv"));
 		
 		System.out.println("time - " + timeIndex );
@@ -502,13 +502,14 @@ public class Tool {
 				if(timeIndex == courseList.get(i).TimeData.get(j).timeIndex){
 					String title = courseList.get(i).title;
 					String platform = courseList.get(i).provider;
+					String url = courseList.get(i).url;
 							
 					for(int k=0; k<reviewList.size(); k++){
 						if(reviewList.get(k).reviewer_id.equals("null"))
 							continue;
 						
 						if(title.equals(reviewList.get(k).title) && platform.equals(reviewList.get(k).provider)){
-							String [] edge = {title, reviewList.get(k).reviewer_id };
+							String [] edge = {url, reviewList.get(k).reviewer_id };
 							writer.writeNext(edge);
 							edge = null;
 							course_flag = true;

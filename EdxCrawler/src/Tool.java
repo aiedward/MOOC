@@ -1,8 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +12,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -198,8 +194,7 @@ public class Tool {
 						
 		data.url = url;
 		
-		data.id = driver.findElement(By.id("course-info-page")).getAttribute("data-course-id").toString();
-		System.out.println(data.id);
+		data.id = Integer.toString(index);
 		
 		if(driver.findElements(By.cssSelector("div.course-start")).size() > 0 ){
 			data.status = driver.findElement(By.cssSelector("div.course-start")).findElement(By.tagName("span")).getText().toString();
@@ -259,32 +254,32 @@ public class Tool {
 			}
 			
 			if(Summary.get(i).getAttribute("data-field").equals("length")){
-				data.length = Summary.get(i).getText();
+				data.length = Summary.get(i).getText().replaceAll("Length: ", "");
 				System.out.println("length - " + data.length);
 				
 			}else if(Summary.get(i).getAttribute("data-field").equals("effort")){
-				data.effort = Summary.get(i).getText();
-				System.out.println("length - " + data.effort);
+				data.effort = Summary.get(i).getText().replaceAll("Effort: ", "");
+				System.out.println("effort - " + data.effort);
 			}		
 			else if(Summary.get(i).getAttribute("data-field").equals("school")){
-				data.school = Summary.get(i).getText();
+				data.school = Summary.get(i).getText().replace("Institution: ", "");
 				System.out.println("school - " + data.school);
 			}else if(Summary.get(i).getAttribute("data-field").equals("subject")){
-				data.subject = Summary.get(i).getText();
+				data.subject = Summary.get(i).getText().replaceAll("Subject: ", "");
 				System.out.println("subject - " + data.subject);
 			}else if(Summary.get(i).getAttribute("data-field").equals("price")){
-				data.price = Summary.get(i).getText();
+				data.price = Summary.get(i).getText().replace("Price: ", "");
 				System.out.println("Price - " + data.price);
 				
 			}else if(Summary.get(i).getAttribute("data-field").equals("level")){
-				data.level = Summary.get(i).getText();
+				data.level = Summary.get(i).getText().replace("Level: ", "");
 				System.out.println("level - " + data.level); 
 			}else if(Summary.get(i).getAttribute("data-field").equals("language")){
 			
 				try{
-					data.language = Summary.get(i).getText();
+					data.language = Summary.get(i).getText().replaceAll("Languages: ", "");
 				}catch(Exception e){
-					data.language = "no language";
+					data.language = "null";
 				}
 				// break loop when assign three values
 				break;
@@ -318,7 +313,7 @@ public class Tool {
 			System.out.println("description - " + data.description);
 			
 		}catch(Exception e){
-			data.description = "no description";
+			data.description = " ";
 		}
 		
 		try{
@@ -327,18 +322,37 @@ public class Tool {
 			System.out.println("What you'll learn - " + data.learnAbout);
 			
 		}catch(Exception e){
-			data.learnAbout = "no info";
+			data.learnAbout = " ";
 		}
 		
-		// Parsing instructor page
+		// Parsing instructors' detail pages, and their info
+		data.instructors = new ArrayList<Instructor>();
+		
 		ArrayList <WebElement> instructors = new ArrayList <WebElement> 
 			(driver.findElements(By.cssSelector("li.list-instructor__item")));
 		
 		for(WebElement instructor : instructors){
+			// add detail url to the url list
 			instructorList.add(instructor.findElement(By.tagName("a")).getAttribute("href"));
 			
+			// parsing basic information of the instructors
+			
+			Instructor inst = new Instructor();
+			inst.name = instructor.findElement(By.tagName("a")).findElement(By.tagName("p")).getText();
+			ArrayList <WebElement> tempList = new ArrayList <WebElement>
+				(instructor.findElements(By.cssSelector("p.instructor-position")));
+			if(tempList.size() != 0)
+				inst.bio = tempList.get(0).getText().replaceAll("\n", " at ");
+			else
+				inst.bio = "null";
+			
+			inst.img = instructor.findElement(By.tagName("a")).findElement(By.tagName("img")).getAttribute("src");
+			data.instructors.add(inst);
+			
+							
 		}
 		
+			
 
 		// making dom elements
 		
@@ -364,12 +378,13 @@ public class Tool {
 			course_info.appendChild(published_date);
 
 			// course intro
+			/*
 			org.w3c.dom.Element course_intro = newCreatedDocument.createElement("course_intro");
 			course_intro.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.intro));
 			course_info.appendChild(course_intro);
-			
+			*/
 			// length
-			org.w3c.dom.Element course_length = newCreatedDocument.createElement("length");
+			org.w3c.dom.Element course_length = newCreatedDocument.createElement("course_length");
 			course_length.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.length));
 			course_info.appendChild(course_length);
 			
@@ -403,17 +418,6 @@ public class Tool {
 			course_language.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.language));
 			course_info.appendChild(course_language);
 			
-						
-			// description
-			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
-			course_description.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.description));
-			course_info.appendChild(course_description);
-			
-			// learn about
-			org.w3c.dom.Element learn_about = newCreatedDocument.createElement("learn_about");
-			learn_about.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.learnAbout));
-			course_info.appendChild(learn_about);
-			
 			// url
 			org.w3c.dom.Element course_url = newCreatedDocument.createElement("url");
 			course_url.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.url));
@@ -425,7 +429,40 @@ public class Tool {
 			course_info.appendChild(status);
 
 			
-								
+			// instructors
+			org.w3c.dom.Element dom_instructors = newCreatedDocument.createElement("instructors");
+			for(int i=0; i<data.instructors.size(); i++){
+				org.w3c.dom.Element instructor = newCreatedDocument.createElement("instructor");
+				
+				org.w3c.dom.Element name = newCreatedDocument.createElement("name");
+				name.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.instructors.get(i).name));
+				org.w3c.dom.Element bio = newCreatedDocument.createElement("bio");
+				bio.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.instructors.get(i).bio));
+				org.w3c.dom.Element img = newCreatedDocument.createElement("img");
+				img.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.instructors.get(i).img));
+				instructor.appendChild(name);
+				instructor.appendChild(bio);
+				instructor.appendChild(img);
+				
+				
+				dom_instructors.appendChild(instructor);
+			}
+			course_info.appendChild(dom_instructors);
+			
+
+			
+			// description
+			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");
+			course_description.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.description + data.learnAbout));
+			course_info.appendChild(course_description);
+			
+			// learn about
+			/*
+			org.w3c.dom.Element learn_about = newCreatedDocument.createElement("learn_about");
+			learn_about.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.learnAbout));
+			course_info.appendChild(learn_about);
+			*/
+											
 		}
 
 		if(index == urlSize -1){

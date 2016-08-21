@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public class Data {
@@ -28,7 +27,8 @@ public class Data {
 
 	public String id;
 	
-	public String instructors;
+//	public String instructors;
+	public ArrayList <Instructor> instructors;
 	
 	public String school;
 	
@@ -43,4 +43,8 @@ public class Data {
 	
 	public String effort;
 	
+	
+
+	
 }
+

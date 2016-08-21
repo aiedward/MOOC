@@ -19,8 +19,8 @@ public class Main {
 //		tool.writeReviewToJson();
 //		tool.printTimeSeries();
 		
-//		tool.writeXTdataToCsv();
-//		tool.writeXTReviewToCsv();
+		tool.writeXTdataToCsv();
+		tool.writeXTReviewToCsv();
 		tool.filterTimeForWritingConnection();
 
 	
