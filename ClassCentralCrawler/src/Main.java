@@ -1,5 +1,8 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,12 +22,13 @@ public class Main {
 	
 	public final static String targetUrlList[] = 
 		{ 
-				"https://www.class-central.com/courses/recent",
-				"https://www.class-central.com/courses/recentlyAdded",
-				"https://www.class-central.com/courses/ongoing",
-				"https://www.class-central.com/courses/upcoming",
+				"https://www.class-central.com/courses/past",
 				"https://www.class-central.com/courses/selfpaced",
-				"https://www.class-central.com/courses/past"
+				"https://www.class-central.com/courses/upcoming",
+				"https://www.class-central.com/courses/recent",
+				"https://www.class-central.com/courses/recentlyAdded",				
+				"https://www.class-central.com/courses/ongoing"
+								
 		}; 
 	
 	/*
@@ -36,7 +40,7 @@ public class Main {
 	https://www.class-central.com/courses/past	= past
 
 */	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		
 		Tool tool=new Tool();
 		
@@ -45,6 +49,7 @@ public class Main {
 		for(int i=0; i<targetUrlList.length; i++){
 			try{
 				URLLIST.addAll(tool.getVideoURL(targetUrlList[i]));
+				Thread.sleep(1000);
 			}catch (IOException e1){
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -55,6 +60,9 @@ public class Main {
 		
 		
 		System.out.println("The size of URL is - " + URLLIST.size());
+		System.out.println("make urlList file");
+		makeCoursesUrlFile();
+				
 		System.out.println("Finish getting all courses url, Let's crawl video data");
 		
 		// Document init 
@@ -121,6 +129,19 @@ public class Main {
 		
 	}
 	
+	static void makeCoursesUrlFile() throws IOException{
+		OutputStream output = new FileOutputStream("courses_url.txt");
+		for(String url : URLLIST){
+			
+			try{
+				output.write((url+'\n').getBytes());
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+							
+		}
+		output.close();
+	}
 	
 	static void removeDuplicates(ArrayList<String> list)
 	{

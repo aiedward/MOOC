@@ -16,7 +16,7 @@ public class Main {
 //	public final static String targetProvider = "/providers/edx/courses";
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();
-	public final static String[] targetProviders = {"/providers/udacity/courses", "/providers/edx/courses", "/providers/coursera/courses" };
+	public final static String[] targetProviders = {"/providers/edx/courses", "/providers/coursera/courses" };
 
 	public static void main(String[] args) {
 		

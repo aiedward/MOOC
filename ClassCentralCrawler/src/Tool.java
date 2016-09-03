@@ -52,23 +52,28 @@ public class Tool {
 		
 	}
 	
-	public ArrayList<String> getVideoURL(String targetURL) throws IOException{
+	public ArrayList<String> getVideoURL(String targetURL) throws IOException, InterruptedException{
 		
 		driver.navigate().to(targetURL);
 		driver.manage().window().maximize();
+		Thread.sleep(1000);
 		
 		
 		final ArrayList<String> urlList = new ArrayList<String>();
 
 		
 		boolean plag = false;
-				
-		float position = 2000;
+		
+		float current_position = 0f;		
+		float position = 10000;
+		
 		// page span to load all data 
 		while(!plag){
 			
-			((JavascriptExecutor)driver).executeScript("scroll(0,"+position + ")");
 			
+			scrollingToBottomofAPage(driver);
+			checkPopup(driver);
+						
 			WebElement loadCourses = driver.findElement(By.id("show-more-courses"));
 			
 			
@@ -77,23 +82,19 @@ public class Tool {
 				break;
 				
 			}else{
-								
+			
 				System.out.println(loadCourses.getCssValue("display") );
 				loadCourses.click();
-				position = position + position * 0.5f;
-				
+	
 				try {
-					Thread.sleep(3000);
+					Thread.sleep(2000);
+					checkPopup(driver);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
 			}
-						
-					
-			
-
 		}
 		
 		ArrayList <WebElement> url_list = new ArrayList<WebElement>(driver.findElements(By.className("course-name")));
@@ -103,14 +104,31 @@ public class Tool {
 				System.out.println(url_list.get(i).getAttribute("href"));
 				urlList.add(url_list.get(i).getAttribute("href"));
 			}
-			
-			
 		}
-						
-		
 		System.out.println("size of url - " + urlList.size());
 		
 		return urlList; 
+		
+	}
+	
+	public void scrollingToBottomofAPage(WebDriver driver){
+		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight)");
+	}
+	
+	public void checkPopup(WebDriver driver){
+		
+		if(driver.findElements(By.id("sumome-smartbar-popup")).size() > 0){
+			if(driver.findElements(By.cssSelector("div.sumome-vex-close.sumome-popup-close")).size() > 0){
+				driver.findElement(By.cssSelector("div.sumome-vex-close.sumome-popup-close")).click();
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
 		
 	}
 		
@@ -168,6 +186,8 @@ public class Tool {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		
+		checkPopup(driver);
 		
 		// newCreatedDocument is destination of XML.
 		NodeList nodelist=newCreatedDocument.getElementsByTagName("ROOT");
