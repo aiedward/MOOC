@@ -5,9 +5,13 @@ public class Course {
 	
 	String url;		// courseURL
 	String title;
-	
+	int course_id;
+			
 	// Time Invariant(categorical area; institution; lecturer; lecturer's gender, race, age; level; price)
-	String effort_hours;
+	String average_effort_hours;
+	String course_length;
+	String level;
+	String price;
 	String school;		// institution
 	String subject;		// subject
 	String provider;	// platform
@@ -29,12 +33,10 @@ public class Course {
 	
 	
 	int totalReview_count;
-	float totalReview_value;
-	
+	float totalReview_value = 0.0f;
 	
 	String cetification_type;
 	String pace;
-	
 	
 	ArrayList<Date> endSessionList;
 	ArrayList<Date> reviewIntervalList;
@@ -45,8 +47,6 @@ public class Course {
 	
 	ArrayList<Integer> reviewCount;
 	ArrayList<Float> reviewValue;
-	
-		
 	
 }
 

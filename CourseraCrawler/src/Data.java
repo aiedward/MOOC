@@ -44,5 +44,7 @@ public class Data {
 	public String length;
 	
 	public String effort;
+
+	public String basic_info;
 	
 }

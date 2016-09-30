@@ -14,14 +14,18 @@ public class Main {
 		tool.makeXTdata();
 		tool.calculateCourseReviewCountandValue();
 		
+//		tool.printCourseListWithStartingPoint();
+		
 //		tool.printCourseListWithTime();
 //		tool.writeXTdataToJson();
 //		tool.writeReviewToJson();
 //		tool.printTimeSeries();
 		
+//		tool.courseTimeAdjust();
+		
 		tool.writeXTdataToCsv();
 		tool.writeXTReviewToCsv();
-		tool.filterTimeForWritingConnection();
+//		tool.filterTimeForWritingConnection();
 
 	
 				

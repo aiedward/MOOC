@@ -12,10 +12,12 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -37,7 +39,7 @@ public class Tool {
 	
 	WebDriver driver;
 
-	public void initDriver(){
+	public void initDriver() throws InterruptedException{
 		
 		System.setProperty(
 				"webdriver.chrome.driver",
@@ -49,12 +51,59 @@ public class Tool {
 		driver.manage().window().maximize();
 		
 		
+		driver.navigate().to("https://www.coursera.org");
+		Actions actionObject = new Actions(driver);
+		Thread.sleep(15000);
+		
+		// currently the coursera platform block the login-access through selenuim web-driver 
+		// so, sleep the program and I manually login to the platform
+		
+		// *********************** PLEASE LOGIN MANUANLLY!!! *************************
+	
+		
+		/*System.out.println(driver.findElement(By.cssSelector("ul.c-navbar-list.bt3-nav.bt3-navbar-nav.bt3-navbar-right")).getLocation());
+		
+		WebElement login = driver.findElement(By.cssSelector("ul.c-navbar-list.bt3-nav.bt3-navbar-nav.bt3-navbar-right"));
+		((JavascriptExecutor) driver).executeScript("window.scrollTo(" + login.getLocation().x + "," + (login.getLocation().y + 20) + ")");
+		System.out.println(login.getLocation());
+		actionObject.click(login).perform();
+		Thread.sleep(2000);
+		
+		WebElement id = driver.findElement(By.cssSelector("input#user-modal-email.placeholder"));
+		
+		Thread.sleep(500);
+			
+						
+		// move to the location of the element to input	
+		((JavascriptExecutor) driver).executeScript("window.scrollTo(0," + (id.getLocation().y) + ")");
+		actionObject.sendKeys("totoro1865@naver.com").perform();
+				
+//		id.sendKeys("totoro1865@naver.com");
+		Thread.sleep(1000);
+		actionObject.sendKeys(Keys.ENTER).perform();
+		Thread.sleep(3000);
+//		((JavascriptExecutor) driver).executeScript("window.scrollTo(0," + (pw.getLocation().y) + ")");
+		actionObject.sendKeys("heungseok2").perform();
+		Thread.sleep(1000);
+//		actionObject.sendKeys(Keys.ENTER).perform();
+//		pw.sendKeys("heungseok2");
+//		pw.sendKeys(Keys.ENTER);
+		Thread.sleep(3000);
+		
+	*/	
 	}
 	
 	
 	public ArrayList<String> getVideoURL(String targetSite) throws IOException, InterruptedException{
 		
+		
+		
+		
+		
 		driver.navigate().to(targetSite);
+		
+		
+		
 		
 		final ArrayList<String> urlList = new ArrayList<String>();
 		
@@ -116,7 +165,7 @@ public class Tool {
 	 * Crawl data.
 	 * 
 	 */
-	public void crawlData(final String url, int index) throws IOException{
+	public void crawlData(final String url, int index) throws IOException, InterruptedException{
 			
 		// open website
 		driver.navigate().to(url);
@@ -209,12 +258,42 @@ public class Tool {
 				data.effort = value;
 			}else if(key.equals("language")){
 				data.language = value;
+			}else if(key.equals("basic info")){
+				data.basic_info = value;
 			}
 			
 		}
 
 		// course description
 		data.description = driver.findElement(By.cssSelector("div.about-section-wrapper")).getText();
+		
+		// course price for certification parsing
+		driver.findElement(By.cssSelector("button.course-enroll-button-wrapper.comfy.primary")).click();
+		Thread.sleep(1500);
+		
+//		List <WebElement> price_option = driver.findElements(By.cssSelector("div.bt3-radio.choice-radio-container"));
+		List <WebElement> price_option = driver.findElements(By.cssSelector("h4.primary-description"));
+		
+		int length_of_prices = price_option.size();
+		switch(length_of_prices){
+			case 0:
+				data.price = null;
+				break;
+			case 1:
+				data.price = price_option.get(0).getText();
+				break;
+			case 2:
+				data.price = price_option.get(0).getText();
+				break;
+			case 3:
+				data.price = price_option.get(1).getText();
+				break;
+			default:
+				data.price = null;
+				
+		}
+		System.out.println(data.price);
+		
 		
 		// making dom elements
 		
@@ -250,11 +329,11 @@ public class Tool {
 			course_info.appendChild(course_subject);
 			
 			// price
-			/*
+
 			org.w3c.dom.Element course_price = newCreatedDocument.createElement("price");
 			course_price.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.price));
 			course_info.appendChild(course_price);
-			*/
+
 			// level
 			org.w3c.dom.Element course_level = newCreatedDocument.createElement("level");
 			course_level.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.level));
@@ -295,6 +374,11 @@ public class Tool {
 				instructors.appendChild(instructor);
 			}
 			course_info.appendChild(instructors);
+			
+			// basic info
+			org.w3c.dom.Element basic_info = newCreatedDocument.createElement("basic_info");
+			basic_info.appendChild(createTextNodeWithoutNull(newCreatedDocument, data.basic_info));
+			course_info.appendChild(basic_info);
 			
 			// description
 			org.w3c.dom.Element course_description = newCreatedDocument.createElement("description");

@@ -17,7 +17,7 @@ public class Main {
 	public static ArrayList<String> TOPICURLLIST = new ArrayList<String>();
 	public static ArrayList<String> URLLIST = new ArrayList<String>();
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		
 		Tool tool=new Tool();
 		tool.initDriver();
@@ -41,7 +41,7 @@ public class Main {
 		System.out.println();
 		
 		for (int url_id = 0; url_id <URLLIST.size(); url_id++) {
-//		for (int url_id = 0; url_id <10; url_id++) {
+//		for (int url_id = 0; url_id <5; url_id++) {
 			
 			String urlString = URLLIST.get(url_id);
 			System.out.print(urlString+"\n");

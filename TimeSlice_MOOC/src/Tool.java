@@ -33,7 +33,7 @@ public class Tool {
 	
 	public void getCourseData() throws IOException{
 		
-		final String inputFile = "Integrated_Course_20160712"; 
+		final String inputFile = "Integrated_Course_20160904"; 
 		
 		try{
 			mReader = new CSVReader(new FileReader(inputFile + ".csv"));
@@ -64,7 +64,21 @@ public class Tool {
 			String subject = nextLine[2];
 			String school = nextLine[3];
 			String language = nextLine[4];
+			String effort_hour = nextLine[5];
+			if(!effort_hour.equals("null")){
+				String temp[] = effort_hour.split(" ");
+				if(temp[0].contains("-")){
+					String efforts[] = temp[0].split("-");
+					effort_hour = String.valueOf( ( Float.valueOf(efforts[0]) + Float.valueOf(efforts[1]) ) / 2 );
+				}else{
+					effort_hour = temp[0];
+				}
+			}
+			System.out.println(effort_hour);
+			String course_length = nextLine[7];
 			String url = nextLine[14];
+			String level = nextLine[15];
+			String price = nextLine[16];
 			
 			
 //			System.out.println(nextLine[6]);
@@ -105,6 +119,10 @@ public class Tool {
 			temp.sessionList.add(session);
 			temp.session_length = session_length;
 			temp.url = url;
+			temp.course_length = course_length;
+			temp.price = price;
+			temp.level = level;
+			temp.average_effort_hours = effort_hour;
 			
 			courseList.add(temp);
 			
@@ -271,6 +289,7 @@ public class Tool {
 			}
 			
 		});
+		System.out.println("courseList sorting finished");
 		
 
 		// sort reviewList by date
@@ -292,43 +311,6 @@ public class Tool {
 	}
 	
 	
-	
-	// for adding interval to the courseList
-	public void updateIntervaltoCourseList(int timeIndex, int reviewIndex ){
-		
-		Review review = reviewList.get(reviewIndex);
-		CourseTime tempCourseTime = new CourseTime();
-		
-		for(int i=0; i<courseList.size(); i++){
-			// matching with course title and platform
-			if(courseList.get(i).title.equals(review.title) && courseList.get(i).provider.equals(review.provider)){
-				// update the element of the courseList
-//				System.out.println(courseList.get(i).title);
-												
-				boolean flagOfadded = false;
-				for(int j=0; j<courseList.get(i).TimeData.size(); j++){
-					// if Time-series data has already the same interval store, then just add up 1 review count and value
-					if(courseList.get(i).TimeData.get(j).timeIndex == timeIndex){
-						courseList.get(i).TimeData.get(j).reviewValue += review.review_value;
-						courseList.get(i).TimeData.get(j).reviewCount += 1;
-						flagOfadded = true;
-						break;
-					}
-				}
-				
-				// if Time-series data doesn't have any element, then just add the time data
-				if(courseList.get(i).TimeData.isEmpty() || !flagOfadded){
-					tempCourseTime.reviewCount = 1;
-					tempCourseTime.reviewValue = review.review_value;
-					tempCourseTime.timeIndex = timeIndex;
-					courseList.get(i).TimeData.add(tempCourseTime);
-				}
-			
-			}
-		}
-		
-	}
-	
 	// add review count to each course's totalReview_count from timeSeries Data
 	// and normalize review value between 0~5
 	public void calculateCourseReviewCountandValue(){
@@ -340,7 +322,11 @@ public class Tool {
 				courseList.get(i).totalReview_value += courseList.get(i).TimeData.get(j).reviewValue;
 				
 			}
-			courseList.get(i).totalReview_value = courseList.get(i).totalReview_value / courseList.get(i).totalReview_count; 
+			
+			if(courseList.get(i).totalReview_count != 0){
+				courseList.get(i).totalReview_value = courseList.get(i).totalReview_value / courseList.get(i).totalReview_count;
+			}
+			 
 		
 		}
 	}
@@ -401,6 +387,43 @@ public class Tool {
 	
 		}
 		
+		
+		// assign time data to courseList (ex- first course in mooc has time data as 0~endpoint, other courses have time as x~endpoint)
+		for(int i=0; i<timeFor_fixedEffect.TimeList.size()-1; i++){
+			CourseTime tempCourseTime = new CourseTime();
+			Date startPoint = timeFor_fixedEffect.TimeList.get(i);
+			
+			c = Calendar.getInstance();
+			c.setTime(timeFor_fixedEffect.TimeList.get(i+1));
+//			c.add(Calendar.DATE, 1);
+			Date endPoint = c.getTime();
+
+			for(int j=0; j<courseList.size(); j++){
+				Date course_startPoint = courseList.get(j).startingPoint;
+
+				if( (startPoint.before(course_startPoint) || startPoint.equals(course_startPoint))
+						&& endPoint.after(course_startPoint) )
+						{
+					for(int k=i; k<timeFor_fixedEffect.TimeList.size()-1; k++){
+						
+						tempCourseTime = new CourseTime();
+						tempCourseTime.timeIndex = k;
+						tempCourseTime.from = new Date();
+						tempCourseTime.to = new Date();
+						tempCourseTime.from = timeFor_fixedEffect.TimeList.get(k);
+						tempCourseTime.to = timeFor_fixedEffect.TimeList.get(k+1);
+						System.out.println("index - " + tempCourseTime.timeIndex + "/ from - " 
+								+ transFormat.format(tempCourseTime.from) + "/ to - " + transFormat.format(tempCourseTime.to));
+						
+						courseList.get(j).TimeData.add(tempCourseTime);
+						tempCourseTime = null;
+					}
+					
+				}
+			}
+			
+		}
+		
 		// assign review count and value to XTData 
 		for(int i=0; i<timeFor_fixedEffect.TimeList.size()-1; i++){
 			// Set startPoint as Ti < reviewDate < T(i+1) +1day
@@ -408,18 +431,22 @@ public class Tool {
 						
 			c = Calendar.getInstance();
 			c.setTime(timeFor_fixedEffect.TimeList.get(i+1));
-			c.add(Calendar.DATE, 1);
+//			c.add(Calendar.DATE, 1);
 			Date endPoint = c.getTime();
 			int currentReviewCount = timeFor_fixedEffect.ReviewCountList.get(i);
 			float currentReviewValue = timeFor_fixedEffect.ReviewValueList.get(i);
+						
 			
 			for(int j=0; j<reviewList.size(); j++){
 				
+				Date currentReviewTime = reviewList.get(j).review_date;
+				
 				// this condition is for checking whether reviewer has their ID.
 				if(reviewList.get(j).reviewer_id.equals("null"))
-					continue;	
+					continue;
 				
-				if(startPoint.before(reviewList.get(j).review_date) && endPoint.after(reviewList.get(j).review_date)){
+				if( (startPoint.before(currentReviewTime) || startPoint.equals(currentReviewTime)) 
+						&& endPoint.after(currentReviewTime)){
 										
 					timeFor_fixedEffect.ReviewCountList.set(i, currentReviewCount++);
 					currentReviewValue += reviewList.get(j).review_value;
@@ -440,6 +467,47 @@ public class Tool {
 		
 
 	}
+	
+	// for adding interval to the courseList
+	// from start-point to end-point of analysis
+	public void updateIntervaltoCourseList(int timeIndex, int reviewIndex ){
+			
+		Review review = reviewList.get(reviewIndex);
+		CourseTime tempCourseTime = new CourseTime();
+		
+		for(int i=0; i<courseList.size(); i++){
+			// matching with course title and platform
+			if(courseList.get(i).title.equals(review.title) && courseList.get(i).provider.equals(review.provider)){
+				// update the element of the courseList
+//					System.out.println(courseList.get(i).title);
+												
+				boolean flagOfadded = false;
+				for(int j=0; j<courseList.get(i).TimeData.size(); j++){
+					// if Time-series data has already the same interval store, then just add up 1 review count and value
+					if(courseList.get(i).TimeData.get(j).timeIndex == timeIndex){
+						courseList.get(i).TimeData.get(j).reviewValue += review.review_value;
+						courseList.get(i).TimeData.get(j).reviewCount += 1;
+						flagOfadded = true;
+						break;
+					}
+				}
+				
+				// if Time-series data doesn't have any element, then just add the time data
+				if(courseList.get(i).TimeData.isEmpty() || !flagOfadded){
+//					System.out.println("init timeData of the course - " + courseList.get(i).title);
+					tempCourseTime.reviewCount = 1;
+					tempCourseTime.reviewValue = review.review_value;
+					tempCourseTime.timeIndex = timeIndex;
+					tempCourseTime.from = timeFor_fixedEffect.TimeList.get(timeIndex);
+					tempCourseTime.to = timeFor_fixedEffect.TimeList.get(timeIndex+1);
+					
+					courseList.get(i).TimeData.add(tempCourseTime);
+				}
+			
+			}
+		}
+		
+	}	
 	
 	public void filterTimeForWritingConnection(){
 		ArrayList <Integer> existingTimeList = new ArrayList<Integer>();
@@ -533,7 +601,7 @@ public class Tool {
 	
 	public void writeXTdataToCsv() throws IOException{
 		
-		String result = "./results/CourseXTdata.csv";
+		String result = "./results/CourseXTdata_addTime.csv";
 		CSVWriter writer = new CSVWriter(new FileWriter(result));
 		
 		ArrayList<String> record = new ArrayList<String>();
@@ -541,7 +609,8 @@ public class Tool {
 		// timeIndex,timeReviewCount,timeReviewValue
 		String [] colname = { "url","title","platform","institution","subject"
 				,"language","keywords","totalReviewCount","totalReviewValue",
-				"time","timeReviewCount","timeReviewValue"};
+				"AvgEffortHours(perWeeks)", "CourseLength(weeks)", "price", "level",
+				"time","timeReviewCount","timeReviewValue", "timeFrom", "timeTo"};
 		
 		writer.writeNext(colname);
 		for(int i=0; i<courseList.size(); i++){
@@ -563,11 +632,19 @@ public class Tool {
 			record.add(String.valueOf(courseList.get(i).totalReview_count));
 			record.add(String.valueOf(courseList.get(i).totalReview_value));
 			
+			record.add(String.valueOf(courseList.get(i).average_effort_hours));
+			record.add(String.valueOf(courseList.get(i).course_length));
+			record.add(String.valueOf(courseList.get(i).price));
+			record.add(String.valueOf(courseList.get(i).level));
+					
+			
 			// Time
 			for(int j=0; j<courseList.get(i).TimeData.size(); j++){
 				record.add(String.valueOf(courseList.get(i).TimeData.get(j).timeIndex));
 				record.add(String.valueOf(courseList.get(i).TimeData.get(j).reviewCount));
 				record.add(String.valueOf(courseList.get(i).TimeData.get(j).reviewValue));
+				record.add(transFormat.format(courseList.get(i).TimeData.get(j).from));
+				record.add(transFormat.format(courseList.get(i).TimeData.get(j).to));
 				
 				String [] temp = record.toArray(new String[record.size()]);
 				writer.writeNext(temp);
@@ -575,6 +652,8 @@ public class Tool {
 				record.remove(list_length-1);
 				record.remove(list_length-2);
 				record.remove(list_length-3);
+				record.remove(list_length-4);
+				record.remove(list_length-5);
 				temp = null;
 			}
 			
@@ -633,7 +712,6 @@ public class Tool {
 		JSONObject root = new JSONObject();
 		JSONArray course_list = new JSONArray();
 			
-//		for(int i=0; i<10; i++){
 		for(int i=0; i<courseList.size(); i++){
 			
 			JSONObject obj = new JSONObject();
@@ -642,7 +720,7 @@ public class Tool {
 			obj.put("provider", courseList.get(i).provider);
 			obj.put("subject", courseList.get(i).subject);
 			obj.put("language", courseList.get(i).language);
-//			obj.put("effortHours", courseList.get(i).effort_hours);
+						
 			
 			//// session assign
 			JSONObject Session = new JSONObject();
@@ -676,9 +754,6 @@ public class Tool {
 				keywords.add(keyword);
 			}
 			obj.put("Keywords", keywords);
-	
-			
-			
 			
 
 			//// Time Series data assign
@@ -692,11 +767,7 @@ public class Tool {
 				time.put("time", courseList.get(i).TimeData.get(j).timeIndex);
 				time.put("reviewCount", courseList.get(i).TimeData.get(j).reviewCount);
 				// normalizing reviewValue between 0~5
-				time.put("reviewValue", courseList.get(i).TimeData.get(j).reviewValue/courseList.get(i).TimeData.get(j).reviewCount);
-				
-				// needs to add other Time-varying independent variable
-				// ; network centrality of courseNetwork(connected by reviewer) or keyworkNetwork
-												
+				time.put("reviewValue", courseList.get(i).TimeData.get(j).reviewValue/courseList.get(i).TimeData.get(j).reviewCount);												
 				times.add(time);
 			}
 			TimeSeries.put("Time", times);
@@ -812,6 +883,13 @@ public class Tool {
 		}
 
 		
+	}
+	
+	public void printCourseListWithStartingPoint(){
+		
+		for(Course course: courseList){
+			System.out.println("Title - " + course.title + "// starting point - " + course.startingPoint);
+		}
 	}
 	
 	
@@ -979,14 +1057,51 @@ public class Tool {
 		}
 		
 	}
+
+
+	public void courseTimeAdjust() {
+		
+		
+		for(int i=0; i<courseList.size(); i++){
+			
+			// time index sort
+			Collections.sort(courseList.get(i).TimeData, new Comparator<CourseTime>(){
+				@Override
+				public int compare(CourseTime time1, CourseTime time2){
+					return time1.timeIndex < time2.timeIndex ? -1 : 1;
+				}
+			});
+			
+			int timeListSize = courseList.get(i).TimeData.size();
+			if(timeListSize > 1){
+				for(int j=0; j<timeListSize-1; j++){
+					int currentTime = courseList.get(i).TimeData.get(j).timeIndex;
+					int nextTime = courseList.get(i).TimeData.get(j+1).timeIndex;
+					int timeDifference = nextTime - currentTime;
+					if(timeDifference > 1){
+						for(int k=0; k<timeDifference-1; k++){
+							CourseTime tempCourse = new CourseTime();
+							currentTime += 1;
+							tempCourse.timeIndex = currentTime;
+							courseList.get(i).TimeData.add(tempCourse);
+						}
+					}
+					
+					
+				}
+			}
+			
+			Collections.sort(courseList.get(i).TimeData, new Comparator<CourseTime>(){
+				@Override
+				public int compare(CourseTime time1, CourseTime time2){
+					return time1.timeIndex < time2.timeIndex ? -1 : 1;
+				}
+			});
+			
+		}
 	
-
-
-
-
+	}
 	
-
-
 
 
 }
